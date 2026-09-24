@@ -94,7 +94,10 @@ export function hardFilter(p: NormalizedPosting, cfg: SearchConfig, now: Date = 
   if (p.postedAt === null) {
     flags.push("posted-date-unknown");
   } else if (now.getTime() - p.postedAt.getTime() > cfg.maxPostingAgeDays * DAY_MS) {
-    reasons.push("too-old");
+    const days = Math.floor((now.getTime() - p.postedAt.getTime()) / DAY_MS);
+    // Career pages list only open roles, so age is informational there; job boards keep stale ads
+    if (cfg.ageExemptSources.includes(p.source)) flags.push(`long-open:${days}d`);
+    else reasons.push("too-old");
   }
 
   const location = classifyLocation(p, cfg);

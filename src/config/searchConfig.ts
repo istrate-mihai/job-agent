@@ -57,6 +57,22 @@ export const SearchConfigSchema = z.object({
       enabled: z.boolean(),
       categories: TermList.min(1),
     }),
+    jobicy: z
+      .object({
+        enabled: z.boolean(),
+        geos: TermList.min(1),
+        count: z.number().int().min(1).max(200).default(100),
+      })
+      .default({ enabled: false, geos: ["romania"], count: 100 }),
+    smartrecruiters: z
+      .array(
+        z.object({
+          company: z.string().min(1),
+          companyId: z.string().min(1), // from careers.smartrecruiters.com/<companyId>
+          country: z.string().length(2).nullable().default("ro"), // ISO code; null = all countries
+        }),
+      )
+      .default([]),
     greenhouse: z.array(z.object({ company: z.string().min(1), boardToken: z.string().min(1) })).default([]),
     lever: z
       .array(
@@ -77,6 +93,8 @@ export const SearchConfigSchema = z.object({
   titles: z.object({ include: TermList.min(1), exclude: TermList }),
   seniority: z.object({ target: z.string().min(1), allow: TermList.min(1) }),
   maxPostingAgeDays: z.number().int().positive(),
+  // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
+  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever"]),
   stackWeights: z.record(z.string(), z.number().min(0).max(1)),
   languageFlags: TermList,
   companies: z.object({ allowlist: TermList, blocklist: TermList }),

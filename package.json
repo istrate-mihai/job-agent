@@ -18,7 +18,9 @@
     "llm:models": "tsx --env-file=.env src/scripts/llmModels.ts",
     "cv:base": "tsx --env-file=.env src/scripts/renderBaseCv.ts",
     "tailor": "tsx --env-file=.env src/scripts/tailor.ts",
-    "track": "tsx --env-file=.env src/scripts/track.ts"
+    "track": "tsx --env-file=.env src/scripts/track.ts",
+    "gmail:check": "tsx --env-file=.env src/scripts/gmailCheck.ts",
+    "refilter": "tsx --env-file=.env src/scripts/refilter.ts"
   },
   "keywords": [],
   "author": "",

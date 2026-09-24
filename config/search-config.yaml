@@ -52,11 +52,16 @@ llm:
       # - { provider: anthropic, model: claude-opus-5-5 }
 
 sources:
+  jobicy: # remote jobs open to Romania/Europe (keep the Jobicy link when applying)
+    enabled: true
+    geos: [romania, europe]
+  smartrecruiters: # companyId from careers.smartrecruiters.com/<companyId>
+    - { company: Endava, companyId: Endava, country: ro }
   gmail:
     enabled: true
     # Senders of your job-alert emails. Check the "From" of one real alert per board and adjust.
     query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu)"
-    lookbackDays: 3
+    lookbackDays: 7
     maxMessages: 30
   remotive:
     enabled: true
