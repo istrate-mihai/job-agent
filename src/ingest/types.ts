@@ -17,5 +17,8 @@ export interface NormalizedPosting {
 
 export interface JobSource {
   readonly name: string;
+  readonly timeoutMs?: number; // default 30s; sources that call an LLM need longer
   fetch(signal: AbortSignal): Promise<NormalizedPosting[]>;
+  /** Called only after this run's postings are stored; persist source-side progress here. */
+  commit?(): Promise<void>;
 }

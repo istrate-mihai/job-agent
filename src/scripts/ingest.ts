@@ -30,7 +30,7 @@ async function main(): Promise<number> {
   }
 
   const settled = await Promise.allSettled(
-    sources.map(async (s) => ({ name: s.name, postings: await s.fetch(AbortSignal.timeout(SOURCE_TIMEOUT_MS)) })),
+    sources.map(async (s) => ({ name: s.name, postings: await s.fetch(AbortSignal.timeout(s.timeoutMs ?? SOURCE_TIMEOUT_MS)) })),
   );
 
   const fetched: NormalizedPosting[] = [];
@@ -87,6 +87,12 @@ async function main(): Promise<number> {
       .returning({ status: postings.status });
     inserted += res.length;
     insertedPassing += res.filter((r) => r.status === "new").length;
+  }
+
+  // Sources persist their progress (e.g. processed email ids) only after rows are safely stored
+  for (const [i, result] of settled.entries()) {
+    const source = sources[i];
+    if (result.status === "fulfilled" && source?.commit) await source.commit();
   }
 
   const passing = [...rows.values()].filter((r) => r.status === "new").length;

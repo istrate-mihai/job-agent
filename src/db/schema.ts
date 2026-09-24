@@ -1,5 +1,5 @@
 // src/db/schema.ts
-import { jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const locationTier = pgEnum("location_tier", ["remote", "tierA", "tierB"]);
 export const workMode = pgEnum("work_mode", ["remote", "hybrid", "onsite", "unknown"]);
@@ -47,3 +47,27 @@ export const postings = pgTable(
 
 export type PostingRow = typeof postings.$inferSelect;
 export type NewPostingRow = typeof postings.$inferInsert;
+
+// Alert emails already processed: prevents re-extraction (and re-paying the LLM) on every run
+export const gmailMessages = pgTable("gmail_messages", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  subject: text("subject").notNull(),
+  jobCount: integer("job_count").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Every LLM call is logged: feeds the daily token budget and the real cost numbers for your CV bullet
+export const llmUsage = pgTable(
+  "llm_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    purpose: varchar("purpose", { length: 32 }).notNull(), // "gmail-extract" | "score" | "tailor"
+    model: varchar("model", { length: 64 }).notNull(),
+    inputTokens: integer("input_tokens").notNull(),
+    outputTokens: integer("output_tokens").notNull(),
+    cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+    cacheWriteTokens: integer("cache_write_tokens").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("llm_usage_created_at_idx").on(t.createdAt)],
+);

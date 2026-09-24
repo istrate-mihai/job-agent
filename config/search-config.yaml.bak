@@ -1,0 +1,71 @@
+agent:
+  enabled: true
+  llmEnabled: true
+  dailyTokenBudget: 1500000
+
+llm:
+  extractionModel: claude-haiku-4-5-20251001 # cheap model: alert emails only need field extraction
+
+sources:
+  gmail:
+    enabled: true
+    # Senders of your job-alert emails. Check the "From" of one real alert per board and adjust.
+    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu)"
+    lookbackDays: 3
+    maxMessages: 30
+  remotive:
+    enabled: true
+    categories: [software-dev]
+  # Board token from a careers link: boards.greenhouse.io/<token> or job-boards.greenhouse.io/<token>
+  greenhouse: []
+  # Slug from a careers link: jobs.lever.co/<slug> (jobs.eu.lever.co/<slug> → region: eu)
+  lever: []
+
+locations:
+  remoteScopeAllow: [worldwide, anywhere, global, europe, emea, eu, eea, romania, cet]
+  countryFallback: romania
+  tierA:
+    - { name: Brașov, aliases: [brasov] }
+  tierB: # relocation targets; triggers the relocation line in CV + cover note
+    - { name: București, aliases: [bucuresti, bucharest] }
+    - { name: Craiova, aliases: [] }
+    - { name: Cluj-Napoca, aliases: [cluj] }
+    - { name: Iași, aliases: [iasi] }
+    - { name: Timișoara, aliases: [timisoara] }
+    - { name: Sibiu, aliases: [] }
+    - { name: Oradea, aliases: [] }
+
+titles:
+  include: [full stack, fullstack, full-stack, web developer, software engineer, software developer, backend, back-end, frontend, front-end, php developer, laravel, node.js, nodejs, vue, react, programator, dezvoltator, inginer software]
+  exclude: [principal, staff, architect, head of, director, intern, internship]
+
+seniority:
+  target: mid
+  allow: [junior-mid, mid, mid-senior]
+
+maxPostingAgeDays: 14
+
+stackWeights:
+  laravel: 1.0
+  php: 1.0
+  vue: 1.0
+  react: 0.9
+  typescript: 0.9
+  node: 0.9
+  mongodb: 0.6
+  docker: 0.5
+  llm: 0.5
+
+languageFlags: [german, french, dutch] # mandatory ones get flagged, not auto-rejected
+
+companies:
+  allowlist: [Tremend, Endava, NTT Data, Siemens]
+  blocklist: []
+
+limits:
+  dailyApprovals: 5
+  perCompanyCooldownDays: 30
+
+scoring:
+  tailorThreshold: 70
+  reviewThreshold: 50

@@ -28,6 +28,7 @@ export function htmlToText(html: string): string {
   const text = unescaped
     .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "")
     .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<(p|div|tr|h[1-6])(\s[^>]*)?>/gi, "\n") // block starts: keeps "Title" and "Company" on separate lines
     .replace(/<(br|\/p|\/li|\/div|\/h[1-6]|\/ul|\/ol)\s*\/?>/gi, "\n")
     .replace(/<[^>]+>/g, "");
   return decodeEntities(text)

@@ -10,13 +10,49 @@ const CitySchema = z.object({
 
 const TermList = z.array(z.string().min(1));
 
+const ProviderSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("openai-compatible"),
+    baseUrl: z.url(),
+    apiKeyEnv: z.string().min(1).nullable(), // null = no auth (local Ollama)
+    toolMode: z.enum(["forced", "json"]),
+  }),
+  z.object({
+    kind: z.literal("anthropic"),
+    apiKeyEnv: z.string().min(1),
+  }),
+]);
+
+const RouteList = z.array(z.object({ provider: z.string().min(1), model: z.string().min(1) })).min(1);
+
 export const SearchConfigSchema = z.object({
   agent: z.object({
     enabled: z.boolean(),
     llmEnabled: z.boolean(),
     dailyTokenBudget: z.number().int().positive(),
   }),
+  llm: z
+    .object({
+      maxRetryWaitSec: z.number().int().min(0).max(120),
+      providers: z.record(z.string(), ProviderSchema),
+      tasks: z.object({ extraction: RouteList, scoring: RouteList, tailoring: RouteList }),
+    })
+    .superRefine((llm, ctx) => {
+      for (const [task, routes] of Object.entries(llm.tasks)) {
+        routes.forEach((route, i) => {
+          if (!(route.provider in llm.providers)) {
+            ctx.addIssue({ code: "custom", path: ["tasks", task, i, "provider"], message: `unknown provider "${route.provider}"` });
+          }
+        });
+      }
+    }),
   sources: z.object({
+    gmail: z.object({
+      enabled: z.boolean(),
+      query: z.string().min(1),
+      lookbackDays: z.number().int().min(1).max(30),
+      maxMessages: z.number().int().min(1).max(100),
+    }),
     remotive: z.object({
       enabled: z.boolean(),
       categories: TermList.min(1),
