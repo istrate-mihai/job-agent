@@ -1,0 +1,67 @@
+// src/config/searchConfig.ts
+import { readFile } from "node:fs/promises";
+import { parse } from "yaml";
+import { z } from "zod";
+
+const CitySchema = z.object({
+  name: z.string().min(1),
+  aliases: z.array(z.string().min(1)).default([]),
+});
+
+const TermList = z.array(z.string().min(1));
+
+export const SearchConfigSchema = z.object({
+  agent: z.object({
+    enabled: z.boolean(),
+    llmEnabled: z.boolean(),
+    dailyTokenBudget: z.number().int().positive(),
+  }),
+  sources: z.object({
+    remotive: z.object({
+      enabled: z.boolean(),
+      categories: TermList.min(1),
+    }),
+    greenhouse: z.array(z.object({ company: z.string().min(1), boardToken: z.string().min(1) })).default([]),
+    lever: z
+      .array(
+        z.object({
+          company: z.string().min(1),
+          slug: z.string().min(1),
+          region: z.enum(["global", "eu"]).default("global"),
+        }),
+      )
+      .default([]),
+  }),
+  locations: z.object({
+    remoteScopeAllow: TermList.min(1),
+    countryFallback: z.string().min(1),
+    tierA: z.array(CitySchema).min(1),
+    tierB: z.array(CitySchema),
+  }),
+  titles: z.object({ include: TermList.min(1), exclude: TermList }),
+  seniority: z.object({ target: z.string().min(1), allow: TermList.min(1) }),
+  maxPostingAgeDays: z.number().int().positive(),
+  stackWeights: z.record(z.string(), z.number().min(0).max(1)),
+  languageFlags: TermList,
+  companies: z.object({ allowlist: TermList, blocklist: TermList }),
+  limits: z.object({
+    dailyApprovals: z.number().int().positive(),
+    perCompanyCooldownDays: z.number().int().nonnegative(),
+  }),
+  scoring: z.object({
+    tailorThreshold: z.number().int().min(0).max(100),
+    reviewThreshold: z.number().int().min(0).max(100),
+  }),
+});
+
+export type SearchConfig = z.infer<typeof SearchConfigSchema>;
+
+export async function loadSearchConfig(path = "config/search-config.yaml"): Promise<SearchConfig> {
+  const raw: unknown = parse(await readFile(path, "utf8")); // re-read every run: edits apply without restart
+  const result = SearchConfigSchema.safeParse(raw);
+  if (!result.success) {
+    const details = result.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
+    throw new Error(`Invalid ${path}:\n${details}`);
+  }
+  return result.data;
+}
