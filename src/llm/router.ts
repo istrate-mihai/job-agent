@@ -42,20 +42,27 @@ function getProvider(name: string, cfg: ProviderConfig): LlmProvider | null {
   return provider;
 }
 
-/** Zod → JSON Schema accepted by every provider (Gemini rejects $schema / additionalProperties). */
+/**
+ * Zod → JSON Schema sent to providers.
+ * - io "input": transforms (e.g. truncation) are applied locally after the call, not demanded from the model
+ * - drops $schema / additionalProperties (Gemini rejects them)
+ * - drops maxLength / maxItems: Groq enforces the tool schema server-side and fails the whole call
+ *   on an over-long string; length limits are enforced locally by Zod instead
+ */
 export function toToolSchema(schema: z.ZodType): Record<string, unknown> {
+  const DROPPED = new Set(["$schema", "additionalProperties", "maxLength", "maxItems"]);
   const strip = (node: unknown): unknown => {
     if (Array.isArray(node)) return node.map(strip);
     if (node === null || typeof node !== "object") return node;
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(node)) {
-      if (key === "$schema" || key === "additionalProperties") continue;
+      if (DROPPED.has(key)) continue;
       if ((key === "maximum" || key === "minimum") && typeof value === "number" && Math.abs(value) >= Number.MAX_SAFE_INTEGER) continue;
       out[key] = strip(value);
     }
     return out;
   };
-  return strip(z.toJSONSchema(schema)) as Record<string, unknown>;
+  return strip(z.toJSONSchema(schema, { io: "input" })) as Record<string, unknown>;
 }
 
 function summarizeIssues(error: z.ZodError): string {
@@ -108,6 +115,12 @@ export async function generateStructured<T>(config: SearchConfig, req: Structure
         failures.push(`${label}: invalid output (${summarizeIssues(parsed.error)})`);
         user = `${req.user}\n\nYour previous output failed validation: ${summarizeIssues(parsed.error)}. Return corrected output.`;
       } catch (err: unknown) {
+        // Provider-side schema validation (e.g. Groq "Tool call validation failed"): repairable like a local failure
+        if (attempt === 1 && err instanceof LlmHttpError && err.status === 400 && /validat/i.test(err.message)) {
+          failures.push(`${label}: provider rejected output (${err.message.slice(0, 160)})`);
+          user = `${req.user}\n\nYour previous output was rejected by schema validation: ${err.message.slice(0, 300)}. Return corrected output.`;
+          continue;
+        }
         const waitSec = err instanceof LlmHttpError && err.status === 429 ? err.retryAfterSec : null;
         if (attempt === 1 && waitSec !== null && waitSec <= config.llm.maxRetryWaitSec) {
           await sleep(Math.ceil(waitSec * 1000), undefined, { signal: req.signal });

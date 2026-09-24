@@ -14,7 +14,8 @@
     "score": "tsx --env-file=.env src/scripts/score.ts",
     "digest": "tsx --env-file=.env src/scripts/digest.ts",
     "decide": "tsx --env-file=.env src/scripts/decide.ts",
-    "pipeline": "npm run ingest && npm run score && npm run digest"
+    "pipeline": "npm run ingest && npm run score && npm run digest",
+    "llm:models": "tsx --env-file=.env src/scripts/llmModels.ts"
   },
   "keywords": [],
   "author": "",
