@@ -56,7 +56,7 @@ function catalog(cv: MasterCv): string {
   return [
     "EXPERIENCE (entry id — role; bullets as [fact-id] text):",
     ...cv.experience.flatMap((e) => [
-      `(${e.id}) ${e.title}, ${e.company}, ${ym(e.start)}–${ym(e.end)}, ${e.type}`,
+      `(${e.id}) ${e.title}, ${e.company}, ${ym(e.start)}–${ym(e.end)}, ${e.type}${e.subtitle ? ` [${e.subtitle}]` : ""}`,
       ...e.facts.map((f) => `  [${f.id}] ${f.text}`),
     ]),
     "",

@@ -34,7 +34,8 @@ export function buildCandidateProfile(cv: MasterCv, now: Date = new Date()): Can
     "",
     "Experience:",
     ...cv.experience.map(
-      (e) => `- ${e.title}, ${e.company} (${ym(e.start)}–${ym(e.end)}, ${e.type}): ${e.facts.map((f) => f.text).join(" ")}`,
+      (e) =>
+        `- ${e.title}, ${e.company} (${ym(e.start)}–${ym(e.end)}, ${e.type})${e.subtitle ? ` [${e.subtitle}]` : ""}: ${e.facts.map((f) => f.text).join(" ")}`,
     ),
     "",
     "Projects:",
