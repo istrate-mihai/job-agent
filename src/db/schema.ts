@@ -121,3 +121,44 @@ export const decisions = pgTable(
 );
 
 export type PostingScoreRow = typeof postingScores.$inferSelect;
+
+export interface TailoringSelection {
+  roleFocus: string;
+  experienceFactIds: string[]; // ordered; every id exists in master-cv.json
+  projectIds: string[];
+  projectFactIds: string[];
+  prioritySkills: string[];
+}
+
+// One tailored application per posting; re-tailoring overwrites. The PDF lives on disk at outputDir.
+export const tailorings = pgTable("tailorings", {
+  postingId: uuid("posting_id")
+    .primaryKey()
+    .references(() => postings.id, { onDelete: "cascade" }),
+  selection: jsonb("selection").$type<TailoringSelection>().notNull(),
+  summary: text("summary").notNull(),
+  coverNote: text("cover_note").notNull(),
+  language: varchar("language", { length: 2 }).notNull(),
+  warnings: jsonb("warnings").$type<string[]>().notNull(),
+  route: varchar("route", { length: 128 }).notNull(),
+  profileHash: varchar("profile_hash", { length: 64 }).notNull(),
+  outputDir: text("output_dir").notNull(),
+  pdfPages: integer("pdf_pages").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Application history (applied → responded → interview → offer/rejected): feeds follow-ups and metrics
+export const statusEvents = pgTable(
+  "status_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postingId: uuid("posting_id")
+      .notNull()
+      .references(() => postings.id, { onDelete: "cascade" }),
+    fromStatus: postingStatus("from_status").notNull(),
+    toStatus: postingStatus("to_status").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("status_events_posting_id_idx").on(t.postingId)],
+);

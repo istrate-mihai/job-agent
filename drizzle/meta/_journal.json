@@ -22,6 +22,13 @@
       "when": 1790222447100,
       "tag": "0002_faithful_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790275347831,
+      "tag": "0003_nasty_ender_wiggin",
+      "breakpoints": true
     }
   ]
 }

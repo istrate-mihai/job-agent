@@ -120,3 +120,13 @@ scoring:
 
 digest:
   limit: 10 # postings shown per digest
+
+tailoring:
+  outputDir: output/applications
+  batchSize: 5
+  maxPages: 2
+  maxProjects: 4
+  minBullets: 20
+  maxDescriptionChars: 8000
+  photoPath: data/photo.jpg
+

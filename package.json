@@ -15,7 +15,10 @@
     "digest": "tsx --env-file=.env src/scripts/digest.ts",
     "decide": "tsx --env-file=.env src/scripts/decide.ts",
     "pipeline": "npm run ingest && npm run score && npm run digest",
-    "llm:models": "tsx --env-file=.env src/scripts/llmModels.ts"
+    "llm:models": "tsx --env-file=.env src/scripts/llmModels.ts",
+    "cv:base": "tsx --env-file=.env src/scripts/renderBaseCv.ts",
+    "tailor": "tsx --env-file=.env src/scripts/tailor.ts",
+    "track": "tsx --env-file=.env src/scripts/track.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +29,9 @@
     "@google-cloud/local-auth": "^3.0.1",
     "drizzle-orm": "^0.45.3",
     "googleapis": "^182.0.0",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.23.0",
+    "playwright": "^1.63.0",
     "yaml": "^2.9.1",
     "zod": "^4.6.5"
   },

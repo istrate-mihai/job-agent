@@ -94,6 +94,15 @@ export const SearchConfigSchema = z.object({
   digest: z.object({
     limit: z.number().int().min(1).max(50),
   }),
+  tailoring: z.object({
+    outputDir: z.string().min(1),
+    batchSize: z.number().int().min(1).max(20),
+    maxPages: z.number().int().min(1).max(3),
+    maxProjects: z.number().int().min(2).max(5),
+    minBullets: z.number().int().min(6).max(40), // below this the PDF looks half-empty; refilled by relevance
+    maxDescriptionChars: z.number().int().min(500).max(30_000),
+    photoPath: z.string().min(1).nullable(), // null = CV without photo
+  }),
 });
 
 export type SearchConfig = z.infer<typeof SearchConfigSchema>;
