@@ -87,6 +87,12 @@ export const SearchConfigSchema = z.object({
   scoring: z.object({
     tailorThreshold: z.number().int().min(0).max(100),
     reviewThreshold: z.number().int().min(0).max(100),
+    batchSize: z.number().int().min(1).max(200),
+    maxDescriptionChars: z.number().int().min(500).max(30_000),
+    careerGoals: z.string().min(10).max(500),
+  }),
+  digest: z.object({
+    limit: z.number().int().min(1).max(50),
   }),
 });
 

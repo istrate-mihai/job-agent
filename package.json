@@ -10,7 +10,11 @@
     "ingest": "tsx --env-file=.env src/scripts/ingest.ts",
     "typecheck": "tsc -p .",
     "validate:cv": "tsx src/scripts/validateCv.ts",
-    "gmail:auth": "tsx src/scripts/gmailAuth.ts"
+    "gmail:auth": "tsx src/scripts/gmailAuth.ts",
+    "score": "tsx --env-file=.env src/scripts/score.ts",
+    "digest": "tsx --env-file=.env src/scripts/digest.ts",
+    "decide": "tsx --env-file=.env src/scripts/decide.ts",
+    "pipeline": "npm run ingest && npm run score && npm run digest"
   },
   "keywords": [],
   "author": "",

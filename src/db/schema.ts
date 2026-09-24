@@ -71,3 +71,53 @@ export const llmUsage = pgTable(
   },
   (t) => [index("llm_usage_created_at_idx").on(t.createdAt)],
 );
+
+export const recommendation = pgEnum("recommendation", ["apply", "maybe", "skip"]);
+export const scoreConfidence = pgEnum("score_confidence", ["high", "low"]);
+export const decisionKind = pgEnum("decision_kind", ["approve", "skip"]);
+
+export interface ScoreComponents {
+  mustHaveCoverage: number; // 0-40, LLM
+  stackOverlap: number; // 0-20, LLM
+  seniorityFit: number; // 0-15, LLM
+  goalAlignment: number; // 0-10, LLM
+  locationFit: number; // 0-15, computed from location tier
+  penalties: string[]; // deterministic caps applied in code
+}
+
+// One score per posting; re-scoring overwrites. profileHash shows which CV version produced it.
+export const postingScores = pgTable("posting_scores", {
+  postingId: uuid("posting_id")
+    .primaryKey()
+    .references(() => postings.id, { onDelete: "cascade" }),
+  total: integer("total").notNull(),
+  components: jsonb("components").$type<ScoreComponents>().notNull(),
+  recommendation: recommendation("recommendation").notNull(),
+  confidence: scoreConfidence("confidence").notNull(),
+  seniorityMatch: varchar("seniority_match", { length: 8 }).notNull(),
+  primaryStack: text("primary_stack").notNull(),
+  matchedSkills: jsonb("matched_skills").$type<string[]>().notNull(),
+  mustHaveGaps: jsonb("must_have_gaps").$type<string[]>().notNull(),
+  reasoning: text("reasoning").notNull(),
+  route: varchar("route", { length: 128 }).notNull(),
+  profileHash: varchar("profile_hash", { length: 64 }).notNull(),
+  scoredAt: timestamp("scored_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Your approve/skip calls: the ground truth used to calibrate scoring weights later
+export const decisions = pgTable(
+  "decisions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postingId: uuid("posting_id")
+      .notNull()
+      .references(() => postings.id, { onDelete: "cascade" }),
+    decision: decisionKind("decision").notNull(),
+    reason: text("reason"),
+    scoreAtDecision: integer("score_at_decision"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("decisions_posting_id_idx").on(t.postingId)],
+);
+
+export type PostingScoreRow = typeof postingScores.$inferSelect;

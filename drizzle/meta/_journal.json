@@ -15,6 +15,13 @@
       "when": 1790217177131,
       "tag": "0001_wide_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790222447100,
+      "tag": "0002_faithful_falcon",
+      "breakpoints": true
     }
   ]
 }
