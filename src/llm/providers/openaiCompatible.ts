@@ -70,7 +70,12 @@ export function openAiCompatibleProvider(opts: OpenAiCompatibleOptions): LlmProv
       const response = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify(body), signal: call.signal });
       if (!response.ok) {
         const detail = (await response.text()).slice(0, 300);
-        throw new LlmHttpError(opts.id, response.status, detail, parseRetryAfter(response.headers.get("retry-after")));
+        // Groq states the wait in the body ("try again in 7.5s" / "1m2.5s") when the header is missing
+        const bodyWait = /try again in (?:(\d+)m)?([\d.]+)s/i.exec(detail);
+        const retryAfter =
+          parseRetryAfter(response.headers.get("retry-after")) ??
+          (bodyWait ? Number(bodyWait[1] ?? 0) * 60 + Number(bodyWait[2]) : null);
+        throw new LlmHttpError(opts.id, response.status, detail, retryAfter);
       }
 
       const data = ChatResponseSchema.parse(await response.json());

@@ -223,7 +223,7 @@ export async function tailorPosting(
     schema,
     toolName: "record_tailoring",
     toolDescription: "Record the CV selection, summary and cover note for this posting.",
-    maxTokens: 2500,
+    maxTokens: 1500, // ⚡ Groq counts this budget against the 8K tokens/minute free limit; real output is ~800
     signal,
   };
 

@@ -1,0 +1,93 @@
+JOB-AGENT — COMMAND CHEAT SHEET
+Run everything in Git Bash, with Docker Desktop started.
+Project folder: ~/projects/job-agent   (C:\Users\Istrate Mihai\projects\job-agent)
+
+WHAT THE APP DOES
+  1. Collects job postings: Remotive, Jobicy (remote, Romania/Europe), Endava careers
+     (SmartRecruiters), and your Gmail job-alert emails (LinkedIn, eJobs, BestJobs).
+  2. Filters them for free (no AI): titles, locations (Brașov / remote / relocation cities),
+     age, blocklisted companies, required languages.
+  3. Scores each remaining posting 0-100 against your master CV using free AI (Groq/Gemini):
+     apply (70+), maybe (50-69), skip (under 50).
+  4. Shows you a digest. YOU approve or skip each posting.
+  5. For approved postings it builds a tailored CV (PDF), a 3-sentence cover note and a
+     review file (diff.md). Bullets are always your own text from master-cv.json.
+  6. YOU apply manually, then track the application (applied → interview → offer).
+
+------------------------------------------------------------------------------------
+DAILY ROUTINE
+------------------------------------------------------------------------------------
+Start + collect + score + digest:
+  cd ~/projects/job-agent && npm run db:up && npm run gmail:check && npm run pipeline
+
+Show skipped postings too:
+  npm run digest -- --all
+
+Approve / skip (id = the 8 characters in [brackets] in the digest):
+  npm run decide -- <id> approve "reason"
+  npm run decide -- <id> skip "reason"
+
+Build tailored CV + cover note for approved postings:
+  npm run tailor
+  npm run tailor -- <id>          (re-tailor one posting)
+  Output: output/applications/<date>_<company>_<title>_<id>/
+          CV PDF, cover-note.txt, diff.md (read this before applying), tailoring.json
+
+Track applications:
+  npm run track                                  (board + follow-up reminders after 7 days)
+  npm run track -- <id> applied "via careers page"
+  npm run track -- <id> responded | interview | offer | rejected
+
+Stop the database (data is kept):
+  docker compose stop db
+
+------------------------------------------------------------------------------------
+SIMULATION (try the full flow with 3 fictional postings)
+------------------------------------------------------------------------------------
+  npm run simulate                 insert 3 demo postings (Brașov, remote, București)
+  npm run score && npm run digest  score them with the real AI
+  npm run decide -- <id> approve "simulation"
+  npm run tailor                   build the tailored CV + cover note
+  npm run track                    see it on the board
+  npm run simulate -- --clean      remove the demo postings + their scores/decisions
+
+------------------------------------------------------------------------------------
+MAINTENANCE
+------------------------------------------------------------------------------------
+Check the config and CV data:
+  npm run typecheck && npm run validate:cv
+
+Render your base (untailored) CV:
+  npm run cv:base                  → output/Mihai_Septimius_Istrate_CV.pdf
+
+After editing titles / locations / blocklist in config/search-config.yaml:
+  npm run refilter                 re-check postings rejected under the old rules
+
+Check which AI models your keys can use:
+  npm run llm:models
+
+Diagnose Gmail alerts (shows real sender addresses, ✔ = caught, ✖ = missed):
+  npm run gmail:check
+
+Re-authorize Gmail (if you see "invalid_grant"):
+  npm run gmail:auth
+
+After a code update with database changes:
+  npm run db:generate && npm run db:migrate
+
+AI usage so far:
+  docker compose exec db psql -U jobagent -d jobagent -c "SELECT model, count(*) AS calls, sum(input_tokens) AS input, sum(output_tokens) AS output FROM llm_usage GROUP BY 1 ORDER BY 2 DESC;"
+
+------------------------------------------------------------------------------------
+KEY FILES
+------------------------------------------------------------------------------------
+  config/search-config.yaml   what to search: sources, titles, locations, thresholds
+  data/master-cv.json         your CV facts (the only source of CV content)
+  data/photo.jpg              CV photo (set tailoring.photoPath: null for no photo)
+  .env                        API keys + database URL (never commit)
+  secrets/                    Gmail credentials/token (never commit)
+  output/                     generated CVs (gitignored)
+
+GMAIL TIP: don't delete alert emails before running the pipeline. Use a Gmail filter
+(From: jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu → Skip the Inbox +
+label "job-alerts") so they stay out of your inbox but remain searchable.

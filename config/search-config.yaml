@@ -47,6 +47,7 @@ llm:
       # - { provider: anthropic, model: claude-haiku-4-5-20251001 }
     tailoring: # keep CV content off free tiers that train on prompts (see gemini note)
       - { provider: groq, model: openai/gpt-oss-120b }
+      - { provider: gemini, model: gemini-3.5-flash-lite }
       - { provider: groq, model: openai/gpt-oss-20b }
       - { provider: ollama, model: qwen2.5:7b }
       # - { provider: anthropic, model: claude-opus-5-5 }
@@ -132,6 +133,6 @@ tailoring:
   maxPages: 2
   maxProjects: 4
   minBullets: 20
-  maxDescriptionChars: 8000
+  maxDescriptionChars: 4000
   photoPath: data/photo.jpg
 

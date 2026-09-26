@@ -116,7 +116,7 @@ export async function generateStructured<T>(config: SearchConfig, req: Structure
         user = `${req.user}\n\nYour previous output failed validation: ${summarizeIssues(parsed.error)}. Return corrected output.`;
       } catch (err: unknown) {
         // Provider-side schema validation (e.g. Groq "Tool call validation failed"): repairable like a local failure
-        if (attempt === 1 && err instanceof LlmHttpError && err.status === 400 && /validat/i.test(err.message)) {
+        if (attempt === 1 && err instanceof LlmHttpError && err.status === 400 && /validat|tool_use_failed|did not call a tool/i.test(err.message)) {
           failures.push(`${label}: provider rejected output (${err.message.slice(0, 160)})`);
           user = `${req.user}\n\nYour previous output was rejected by schema validation: ${err.message.slice(0, 300)}. Return corrected output.`;
           continue;
