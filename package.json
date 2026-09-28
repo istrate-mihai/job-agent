@@ -23,7 +23,9 @@
     "refilter": "tsx --env-file=.env src/scripts/refilter.ts",
     "simulate": "tsx --env-file=.env src/scripts/simulate.ts",
     "describe": "tsx --env-file=.env src/scripts/describe.ts",
-    "enrich": "tsx --env-file=.env src/scripts/enrich.ts"
+    "enrich": "tsx --env-file=.env src/scripts/enrich.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -46,6 +48,7 @@
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
   }
 }

@@ -1,0 +1,153 @@
+{
+  "basics": {
+    "fullName": "Alex Ion Popescu",
+    "headline": "Full-Stack Software Engineer | PHP/Laravel, Node.js, Vue, React/TypeScript",
+    "email": "alex.popescu@example.com",
+    "phone": "+40 700 000 000",
+    "location": "Brașov, Romania",
+    "links": {
+      "github": "https://github.com/example-user",
+      "linkedin": "https://linkedin.com/in/example-user",
+      "portfolio": "https://example.com/portfolio"
+    },
+    "relocation": { "available": true, "cities": ["București", "Cluj-Napoca"] }
+  },
+  "summarySeeds": {
+    "fullstack": "Full-stack software engineer with 4+ years of software development experience, including 3 years in a professional full-stack role. Builds REST APIs and SaaS applications with PHP/Laravel, Node.js/Express and Vue 3, containerized with Docker.",
+    "backend": "Backend-focused software engineer with 3 years in a professional full-stack role. Designs REST APIs with Laravel and Node.js/Express and improved MySQL analytics query performance by 30%.",
+    "frontend": "Full-stack software engineer building user interfaces with Vue 3 and React/TypeScript on top of Laravel and Node.js APIs.",
+    "ai": "Full-stack software engineer building LLM-powered systems with Python/FastAPI and React, combined with 3 years of professional full-stack experience.",
+    "devops": "Software engineer shipping containerized applications with Docker and GitHub Actions CI, completing a DevOps program covering Kubernetes and AWS.",
+    "industrial": "Software engineer bridging manufacturing and software, with 4+ years of CNC and quality experience."
+  },
+  "experience": [
+    {
+      "id": "acme-dev",
+      "type": "software",
+      "company": "Acme Web SRL",
+      "title": "Full Stack Web Developer",
+      "subtitle": "Stack: PHP, TypeScript, MySQL",
+      "location": "Constanța",
+      "start": "2022-07",
+      "end": "2025-05",
+      "facts": [
+        {
+          "id": "acme-rest-apis",
+          "text": "Designed and scaled RESTful APIs in PHP that reduced internal operational bottlenecks.",
+          "skills": ["PHP", "REST API design"],
+          "roles": ["backend", "fullstack"]
+        },
+        {
+          "id": "acme-mysql",
+          "text": "Optimized MySQL schemas and queries for analytics dashboards, improving query performance by 30%.",
+          "skills": ["MySQL", "Query optimization"],
+          "metric": "30% faster analytics queries",
+          "roles": ["backend", "fullstack"]
+        },
+        {
+          "id": "acme-refactor",
+          "text": "Refactored legacy reporting code to object-oriented standards, reducing recurring incidents by 25%.",
+          "skills": ["PHP", "OOP"],
+          "roles": ["backend", "fullstack"]
+        }
+      ]
+    },
+    {
+      "id": "factory-cnc",
+      "type": "industrial",
+      "company": "Motor Works",
+      "title": "CNC Operator",
+      "location": "Craiova",
+      "start": "2017-07",
+      "end": "2021-11",
+      "facts": [
+        {
+          "id": "factory-machining",
+          "text": "Operated high-precision CNC machinery for engine components to automotive tolerances.",
+          "skills": ["CNC operation"],
+          "roles": ["industrial"]
+        },
+        {
+          "id": "factory-qc",
+          "text": "Performed in-line quality controls to ensure compliance with automotive tolerances.",
+          "skills": ["Quality control"],
+          "roles": ["industrial"]
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "recipes",
+      "name": "Recipe Platform",
+      "repoUrl": "https://github.com/example-user/recipes",
+      "stack": ["PHP 8.2", "Laravel 11", "Vue 3", "MySQL", "Docker"],
+      "roles": ["fullstack", "backend", "frontend"],
+      "facts": [
+        {
+          "id": "recipes-saas",
+          "text": "Production SaaS with Stripe subscriptions, role-based authorization and Laravel Sanctum authentication.",
+          "skills": ["Laravel", "Vue 3", "Stripe", "Laravel Sanctum"],
+          "roles": ["fullstack", "backend"]
+        },
+        {
+          "id": "recipes-tests",
+          "text": "Laravel REST API covered by PHPUnit feature tests.",
+          "skills": ["Laravel", "PHPUnit", "REST API design"],
+          "roles": ["backend", "fullstack"]
+        },
+        {
+          "id": "recipes-node",
+          "text": "Migrated the backend from Laravel to Node.js/Express and redeployed it with PostgreSQL.",
+          "skills": ["Node.js", "Express.js", "PostgreSQL"],
+          "roles": ["backend", "fullstack"]
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "name": "Agents Demo",
+      "stack": ["Python", "FastAPI", "React", "LLM tool calling"],
+      "roles": ["ai", "fullstack"],
+      "facts": [
+        {
+          "id": "agents-loop",
+          "text": "Multi-agent system where each agent runs an autonomous LLM tool-call loop and returns structured reports.",
+          "skills": ["Python", "LLM tool calling", "AI agents"],
+          "roles": ["ai", "backend"]
+        }
+      ]
+    }
+  ],
+  "skills": [
+    { "name": "PHP", "category": "languages", "status": "used" },
+    { "name": "TypeScript", "category": "languages", "status": "used" },
+    { "name": "Python", "category": "languages", "status": "used" },
+    { "name": "Laravel", "category": "backend", "status": "used" },
+    { "name": "Laravel Sanctum", "category": "backend", "status": "used" },
+    { "name": "Node.js", "category": "backend", "status": "used" },
+    { "name": "Express.js", "category": "backend", "status": "used" },
+    { "name": "REST API design", "category": "backend", "status": "used" },
+    { "name": "OOP", "category": "backend", "status": "used" },
+    { "name": "Vue 3", "category": "frontend", "status": "used" },
+    { "name": "React", "category": "frontend", "status": "used" },
+    { "name": "MySQL", "category": "databases", "status": "used" },
+    { "name": "PostgreSQL", "category": "databases", "status": "used" },
+    { "name": "Query optimization", "category": "databases", "status": "used" },
+    { "name": "Docker", "category": "devops", "status": "used" },
+    { "name": "Kubernetes", "category": "devops", "status": "training" },
+    { "name": "AWS", "category": "devops", "status": "training" },
+    { "name": "Stripe", "category": "integrations", "status": "used" },
+    { "name": "LLM tool calling", "category": "integrations", "status": "used" },
+    { "name": "AI agents", "category": "integrations", "status": "used" },
+    { "name": "PHPUnit", "category": "testing", "status": "used" },
+    { "name": "CNC operation", "category": "industrial", "status": "used" },
+    { "name": "Quality control", "category": "industrial", "status": "used" }
+  ],
+  "education": [],
+  "certifications": [{ "name": "Zend PHP Certified Engineer", "issuer": "Zend by Perforce" }],
+  "languages": [
+    { "name": "Romanian", "cefr": "native" },
+    { "name": "English", "cefr": "B2" }
+  ]
+}

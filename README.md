@@ -1,5 +1,7 @@
 # job-agent
 
+[![CI](https://github.com/istrate-mihai/job-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/istrate-mihai/job-agent/actions/workflows/ci.yml)
+
 **An LLM-powered job-search pipeline that finds, scores and tailors applications, with a human approving every one.**
 
 I built this for my own job search as a full-stack developer in Romania. It collects postings from several sources, fetches missing job descriptions, scores each posting against my CV with an LLM, and — for postings I approve — generates a tailored CV and cover letter as PDFs. It never applies on its own: every application is reviewed and sent by me.
@@ -123,7 +125,7 @@ cp .env.example .env            # set POSTGRES_PASSWORD / DATABASE_URL and at le
 npm run db:up && npm run db:migrate
 ```
 
-Create `data/master-cv.json` following the schema in `src/schemas/masterCv.ts`, then check it:
+Create `data/master-cv.json` following the schema in `src/schemas/masterCv.ts` (a complete fictional example lives in `tests/fixtures/sample-cv.json`), then check it:
 
 ```bash
 npm run validate:cv
@@ -168,6 +170,28 @@ Other commands: `refilter` (re-apply filter rules after config changes), `descri
 
 ---
 
+## Testing
+
+```bash
+npm test            # 63 unit tests, no database, network or API keys needed
+npm run typecheck
+```
+
+The suite runs on every push via GitHub Actions and covers the parts where a bug would put something false on a CV or waste an application:
+
+| Area | What is verified |
+|---|---|
+| Claims validator | invented technologies and numbers rejected; `JavaScript` ≠ `Java`; training-only skills only in a learning context; honest gap statements allowed |
+| Summary style | self-praise, first person, copying the posting and unchanged base text are rejected |
+| Tailoring | unknown bullet IDs dropped, misplaced IDs re-routed, retry after a rejected claim, safe fallback after two failures, no assumptions for title-only postings |
+| LLM router | JSON-mode retry after a broken tool call, rate-limit waits parsed from the error body, fallback to the next route, 503 retries, repair prompts, budget stop before any call |
+| Hard filter | location tiers and aliases, remote scope, title include/exclude, stale vs long-open postings, required languages in English and Romanian |
+| Enrichment | LinkedIn description extraction, closed/removed/throttled detection, JSON-LD `JobPosting` in `@graph`, expired `validThrough` |
+| Coverage report | versioned requirements (`Vue.js 3+`), synonyms (`unit testing` ↔ PHPUnit), years vs CV claims, real gaps |
+| Privacy | the LLM profile never contains name, email, phone or links |
+
+Tests use a fictional CV and config (`tests/fixtures/`) and stub `fetch`, so they never touch real providers or your data.
+
 ## Limitations and responsible use
 
 - **LinkedIn enrichment** reads LinkedIn's public, logged-out job pages. LinkedIn's terms don't allow automated access; this is optional (`enrich.linkedin: false`), low-volume (sequential, delayed, capped per run), uses no account, and stops on the first throttling response.
@@ -177,6 +201,5 @@ Other commands: `refilter` (re-apply filter rules after config changes), `descri
 
 ## Roadmap
 
-- Automated test suite (validator, filter, coverage, extraction parsers) and GitHub Actions CI
 - Calibration report: scores vs. approve/skip decisions
 - Small web dashboard for review and tracking
