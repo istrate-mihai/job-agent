@@ -24,6 +24,8 @@ export interface StructuredResult<T> {
   route: string; // "provider/model" that produced it
 }
 
+const MAX_ATTEMPTS_PER_ROUTE = 4;
+
 type ProviderConfig = SearchConfig["llm"]["providers"][string];
 const providerCache = new Map<string, LlmProvider | null>();
 
@@ -36,7 +38,13 @@ function getProvider(name: string, cfg: ProviderConfig): LlmProvider | null {
   } else if (cfg.kind === "anthropic") {
     provider = apiKey ? anthropicProvider(apiKey) : null;
   } else {
-    provider = openAiCompatibleProvider({ id: name, baseUrl: cfg.baseUrl, apiKey, toolMode: cfg.toolMode });
+    provider = openAiCompatibleProvider({
+      id: name,
+      baseUrl: cfg.baseUrl,
+      apiKey,
+      toolMode: cfg.toolMode,
+      ...(cfg.reasoningEffort ? { reasoningEffort: cfg.reasoningEffort } : {}),
+    });
   }
   providerCache.set(name, provider);
   return provider;
@@ -94,7 +102,10 @@ export async function generateStructured<T>(config: SearchConfig, req: Structure
 
     const label = `${route.provider}/${route.model}`;
     let user = req.user;
-    for (let attempt = 1; attempt <= 2; attempt += 1) {
+    let mode: "forced" | "json" | undefined;
+    let waitedSec = 0;
+    let repairs = 0;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_ROUTE; attempt += 1) {
       assertLlmAllowed(config.agent, await tokensUsedToday()); // outside try: budget/kill switch aborts the whole task
       try {
         const result = await provider.callTool({
@@ -106,6 +117,7 @@ export async function generateStructured<T>(config: SearchConfig, req: Structure
           jsonSchema,
           maxTokens: req.maxTokens,
           signal: req.signal,
+          ...(mode ? { mode } : {}),
         });
         await recordUsage(req.task, label, result.usage);
 
@@ -115,19 +127,30 @@ export async function generateStructured<T>(config: SearchConfig, req: Structure
         failures.push(`${label}: invalid output (${summarizeIssues(parsed.error)})`);
         user = `${req.user}\n\nYour previous output failed validation: ${summarizeIssues(parsed.error)}. Return corrected output.`;
       } catch (err: unknown) {
-        // Provider-side schema validation (e.g. Groq "Tool call validation failed"): repairable like a local failure
-        if (attempt === 1 && err instanceof LlmHttpError && err.status === 400 && /validat|tool_use_failed|did not call a tool/i.test(err.message)) {
-          failures.push(`${label}: provider rejected output (${err.message.slice(0, 160)})`);
-          user = `${req.user}\n\nYour previous output was rejected by schema validation: ${err.message.slice(0, 300)}. Return corrected output.`;
+        if (!(err instanceof LlmHttpError)) {
+          failures.push(`${label}: ${err instanceof Error ? err.message.slice(0, 200) : String(err)}`);
+          if (err instanceof SyntaxError && mode !== "json") mode = "json"; // unparseable tool args: try plain JSON mode
+          else break;
           continue;
         }
-        const waitSec = err instanceof LlmHttpError && err.status === 429 ? err.retryAfterSec : null;
-        if (attempt === 1 && waitSec !== null && waitSec <= config.llm.maxRetryWaitSec) {
+        // Model produced no/broken tool call: retry the same model in plain JSON mode (no tool calling)
+        if (err.status === 400 && /validat|tool_use_failed|did not call a tool|parse tool call|generate json/i.test(err.message)) {
+          failures.push(`${label}: provider rejected output (${err.message.slice(0, 120)})`);
+          repairs += 1;
+          if (repairs > 1) break; // forced + JSON both failed: stop burning the per-minute token quota on this model
+          mode = "json";
+          continue;
+        }
+        // Rate limit (429) or overload (502/503/504): wait and retry, within a per-route wait budget
+        const transient = err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504;
+        const waitSec = err.retryAfterSec ?? (err.status === 429 ? 20 : 8 * attempt);
+        if (transient && waitedSec + waitSec <= config.llm.maxRetryWaitSec * 2 && waitSec <= config.llm.maxRetryWaitSec) {
+          waitedSec += waitSec;
           await sleep(Math.ceil(waitSec * 1000), undefined, { signal: req.signal });
           continue;
         }
-        failures.push(`${label}: ${err instanceof Error ? err.message.slice(0, 200) : String(err)}`);
-        break; // provider error or long rate limit: next route
+        failures.push(`${label}: ${err.message.slice(0, 200)}`);
+        break; // long rate limit or hard error: next route
       }
     }
   }

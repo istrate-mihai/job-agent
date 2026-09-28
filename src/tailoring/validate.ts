@@ -54,7 +54,8 @@ export function buildEvidenceIndex(cv: MasterCv): EvidenceIndex {
   // Numbers the candidate may quote: from facts, seeds (e.g. "4+ years") and certifications
   const years = [...cv.experience, ...cv.education].flatMap((e) => [e.start.slice(0, 4), e.end?.slice(0, 4) ?? ""]);
   const numberSources = [...parts, ...years, ...Object.values(cv.summarySeeds), ...cv.education.map((e) => e.program)].join(" ");
-  const numbers = new Set(numberSources.match(NUMBER_RE) ?? []);
+  // "PHP 8.2" also evidences "PHP 8"
+  const numbers = new Set((numberSources.match(NUMBER_RE) ?? []).flatMap((n) => [n, n.split(/[.,]/)[0] ?? n]));
 
   return { corpus, numbers, trainingTerms: [...trainingNorm, "k8s"] };
 }
@@ -68,12 +69,14 @@ const sentencesOf = (text: string): string[] =>
 export interface PostingContext {
   company: string; // may be named (e.g. "Oracle") without counting as a skill claim
   title: string; // numbers in it may be quoted (e.g. "Team 42"); its technologies are NOT auto-allowed
+  description?: string; // numbers in it may be quoted only inside an honest gap sentence ("shorter than the 6-9 years you list")
 }
 
-/** Returns human-readable problems; empty array = text is safe to print. */
+// Honest gap statements ("I have not used Nest.js in production yet") name a technology without claiming it
+const GAP_RE = /\b(not|never|no|yet to|haven't|have not|hasn't|lack|gap|gaps|without|shorter than|nu am|inca nu|nu detin|lipsa)\b/;
+
 export function validateClaims(label: string, text: string, index: EvidenceIndex, rules: TextRules, posting: PostingContext): string[] {
   const problems: string[] = [];
-  const normalized = normalizeText(text);
   const company = normalizeText(posting.company);
   const postingNumbers = new Set(`${posting.company} ${posting.title}`.match(NUMBER_RE) ?? []);
 
@@ -82,26 +85,65 @@ export function validateClaims(label: string, text: string, index: EvidenceIndex
   if (sentences.length > rules.maxSentences) problems.push(`${label}: ${sentences.length} sentences (max ${rules.maxSentences})`);
   if (PLACEHOLDER_RE.test(text)) problems.push(`${label}: contains a placeholder or markup`);
 
-  for (const term of TECH_LEXICON) {
-    const norm = normalizeText(term);
-    if (index.trainingTerms.includes(norm)) continue; // handled below with sentence context
-    if (hasTerm(normalized, norm) && !hasTerm(index.corpus, norm) && !hasTerm(company, norm)) {
-      problems.push(`${label}: mentions "${term}", which the CV does not evidence`);
-    }
-  }
-
+  const descriptionNumbers = new Set(posting.description?.match(NUMBER_RE) ?? []);
   for (const sentence of sentences) {
     const s = normalizeText(sentence);
-    for (const term of index.trainingTerms) {
-      if (hasTerm(s, term) && !LEARNING_RE.test(s)) {
-        problems.push(`${label}: presents "${term}" as experience; it is training-only (mention it only as ongoing training)`);
+    const isGap = GAP_RE.test(s);
+    if (!isGap) {
+      for (const term of TECH_LEXICON) {
+        const norm = normalizeText(term);
+        if (index.trainingTerms.includes(norm)) continue; // handled below with learning-context rule
+        if (hasTerm(s, norm) && !hasTerm(index.corpus, norm) && !hasTerm(company, norm)) {
+          problems.push(`${label}: mentions "${term}", which the CV does not evidence`);
+        }
+      }
+      for (const term of index.trainingTerms) {
+        if (hasTerm(s, term) && !LEARNING_RE.test(s)) {
+          problems.push(`${label}: presents "${term}" as experience; it is training-only (mention it only as ongoing training)`);
+        }
       }
     }
-  }
-
-  for (const n of text.match(NUMBER_RE) ?? []) {
-    if (!index.numbers.has(n) && !postingNumbers.has(n)) problems.push(`${label}: number "${n}" does not appear in the CV`);
+    for (const n of sentence.match(NUMBER_RE) ?? []) {
+      const allowed = index.numbers.has(n) || postingNumbers.has(n) || (isGap && descriptionNumbers.has(n));
+      if (!allowed) problems.push(`${label}: number "${n}" does not appear in the CV`);
+    }
   }
 
   return [...new Set(problems)];
+}
+
+// Recruiters discount self-praise; the CV's evidence should carry the claim
+const INFLATION_RE = /\b(expert|guru|ninja|rockstar|world[- ]class|seasoned|extensive|deep expertise|mastery|highly skilled|passionate|exceptional|outstanding)\b/i;
+const FIRST_PERSON_RE = /\b(i|i'm|i've|my|me)\b/i;
+const MAX_SUMMARY_WORDS = 75;
+const COPY_WINDOW = 7; // words copied verbatim from the posting = keyword stuffing
+
+const wordsOf = (text: string): string[] =>
+  normalizeText(text)
+    .split(/[^a-z0-9+#.]+/)
+    .map((w) => w.replace(/^\.+|\.+$/g, "")) // sentence dots, not "node.js"
+    .filter(Boolean);
+
+/** Style checks the claims validator can't see: length, voice, self-praise, copying the posting or the seed. */
+export function validateSummaryStyle(summary: string, seeds: readonly string[], postingDescription: string): string[] {
+  const problems: string[] = [];
+  const words = wordsOf(summary);
+  if (words.length > MAX_SUMMARY_WORDS) problems.push(`summary: ${words.length} words (max ${MAX_SUMMARY_WORDS})`);
+  if (FIRST_PERSON_RE.test(summary)) problems.push("summary: uses first person; CV summaries are written without \"I\"/\"my\"");
+  const inflated = INFLATION_RE.exec(summary)?.[0];
+  if (inflated) problems.push(`summary: self-praise ("${inflated}"); let the evidence speak`);
+
+  const posting = ` ${wordsOf(postingDescription).join(" ")} `;
+  for (let i = 0; i + COPY_WINDOW <= words.length; i += 1) {
+    const window = words.slice(i, i + COPY_WINDOW).join(" ");
+    if (posting.includes(` ${window} `)) {
+      problems.push(`summary: copies the posting verbatim ("${window}…"); rephrase in the candidate's terms`);
+      break;
+    }
+  }
+  const normalizedSummary = wordsOf(summary).join(" ");
+  if (seeds.some((seed) => normalizedSummary.includes(wordsOf(seed).join(" ")))) {
+    problems.push("summary: repeats a summary seed unchanged; rewrite it for this posting");
+  }
+  return problems;
 }

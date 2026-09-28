@@ -14,8 +14,18 @@ export interface FilterResult {
 
 type City = SearchConfig["locations"]["tierA"][number];
 
-const REQUIRED_RE = /\b(required|mandatory|must|fluent|native|proficient|proficiency|business level|c1|c2|b2)\b/;
-const OPTIONAL_RE = /\b(plus|nice to have|advantage|bonus|preferred|optional)\b/;
+// English + Romanian (diacritics already stripped by normalizeText)
+const REQUIRED_RE = /\b(required|mandatory|must|fluent|native|proficient|proficiency|business level|c1|c2|b2|obligatoriu|obligatorie|necesar|necesara|cerinta|avansat|nivel avansat)\b/;
+const OPTIONAL_RE = /\b(plus|nice to have|advantage|bonus|preferred|optional|avantaj|constituie un avantaj|reprezinta un avantaj)\b/;
+// Romanian/native names, so "limba germana obligatoriu" is caught as German
+const LANGUAGE_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  german: ["germana", "deutsch"],
+  french: ["franceza", "francais"],
+  dutch: ["olandeza", "nederlands"],
+  italian: ["italiana"],
+  spanish: ["spaniola"],
+  hungarian: ["maghiara"],
+};
 const DAY_MS = 86_400_000;
 
 function matchesCity(location: string, cities: readonly City[]): boolean {
@@ -59,7 +69,8 @@ function languageFlags(description: string, languages: readonly string[]): strin
   const sentences = description.split(/[.!?\n]+/).map(normalizeText);
   const flags: string[] = [];
   for (const lang of languages) {
-    const hits = sentences.filter((s) => hasTerm(s, lang));
+    const names = [lang, ...(LANGUAGE_ALIASES[lang.toLowerCase()] ?? [])];
+    const hits = sentences.filter((s) => names.some((n) => hasTerm(s, n)));
     if (hits.length === 0) continue;
     const required = hits.some((s) => REQUIRED_RE.test(s) && !OPTIONAL_RE.test(s));
     flags.push(`${required ? "lang-required" : "lang-mentioned"}:${lang}`);

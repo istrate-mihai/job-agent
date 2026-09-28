@@ -3,8 +3,11 @@
 //        npm run tailor -- <id-prefix> → (re-)tailor one approved or tailored posting
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { desc, eq, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
+import { applicationFileBase, cleanJobTitle, namePrefix } from "../cv/fileNames.js";
+import { letterText, renderLetterPdf } from "../cv/renderLetter.js";
 import { renderFittedCv } from "../cv/renderPdf.js";
 import { db, pool } from "../db/client.js";
 import { postingScores, postings, statusEvents, tailorings, type PostingRow, type PostingScoreRow } from "../db/schema.js";
@@ -14,7 +17,9 @@ import { LlmBlockedError } from "../runtime/guard.js";
 import { renderDiff } from "../tailoring/diff.js";
 import { tailorPosting } from "../tailoring/tailorPosting.js";
 
-const PER_POSTING_TIMEOUT_MS = 240_000; // two LLM calls worst case, plus free-tier 429 waits
+const PER_POSTING_TIMEOUT_MS = 300_000; // two LLM calls worst case, plus free-tier 429/503 waits
+const PAUSE_BETWEEN_POSTINGS_MS = 45_000;
+const TITLE_ONLY_CHARS = 300;
 
 const slug = (value: string, max = 40): string =>
   normalizeText(value)
@@ -59,9 +64,18 @@ async function main(): Promise<number> {
     return 0;
   }
 
+  const allowTitleOnly = process.argv.includes("--allow-title-only");
+  let skipped = 0;
   let done = 0;
   let failed = 0;
-  for (const { p, s } of targets) {
+  for (const [index, { p, s }] of targets.entries()) {
+    if (p.description.trim().length < TITLE_ONLY_CHARS && !allowTitleOnly) {
+      // Tailoring without the real requirements produced a wrong-stack CV (Tchibo, 2026-09-28): require the description
+      console.log(`⏸ ${p.company} — ${p.title}: no job description yet. Run: npm run enrich (automatic). If the site blocks it: npm run describe -- ${p.id.slice(0, 8)} <file.txt>`);
+      skipped += 1;
+      continue;
+    }
+    if (index > 0) await sleep(PAUSE_BETWEEN_POSTINGS_MS); // lets Groq's tokens-per-minute window refill
     try {
       const t = await tailorPosting(p, s, cv, config, AbortSignal.timeout(PER_POSTING_TIMEOUT_MS));
       const rendered = await renderFittedCv(cv, t.selection, t.summary, t.availability, {
@@ -72,13 +86,21 @@ async function main(): Promise<number> {
 
       const date = new Date().toISOString().slice(0, 10);
       const outDir = join(config.tailoring.outputDir, `${date}_${slug(p.company, 30)}_${slug(p.title)}_${p.id.slice(0, 8)}`);
-      const pdfName = `${cv.basics.fullName.replace(/\s+/g, "_")}_CV_${slug(p.company, 30) || "company"}.pdf`;
+      // Istrate_Mihai_Septimius_<Job_Title>_<Company>_CV.pdf / _Cover_Letter.pdf / _Cover_Letter.txt
+      const jobTitle = cleanJobTitle(p.title, p.company);
+      const fileBase = applicationFileBase(namePrefix(cv, config.tailoring.fileNamePrefix), jobTitle, p.company);
+      const pdfName = `${fileBase}_CV.pdf`;
+      const letter = { basics: cv.basics, company: p.company, jobTitle, paragraphs: t.coverLetter, language: t.language, date: new Date() };
+      const letterPdf = await renderLetterPdf(letter);
+      const coverNote = t.coverLetter.join("\n\n");
       const warnings = [...t.warnings];
+      if (letterPdf.pages > 1) warnings.push(`cover letter is ${letterPdf.pages} pages; shorten it before sending`);
       if (rendered.pages > config.tailoring.maxPages) warnings.push(`still ${rendered.pages} pages after all trims`);
 
       await mkdir(outDir, { recursive: true });
       await writeFile(join(outDir, pdfName), rendered.pdf);
-      await writeFile(join(outDir, "cover-note.txt"), `${t.coverNote}\n\n${cv.basics.fullName}\n${cv.basics.email} | ${cv.basics.phone}\n`, "utf8");
+      await writeFile(join(outDir, `${fileBase}_Cover_Letter.pdf`), letterPdf.pdf);
+      await writeFile(join(outDir, `${fileBase}_Cover_Letter.txt`), letterText(letter), "utf8"); // CRLF: paragraphs survive Notepad and web forms
       await writeFile(
         join(outDir, "diff.md"),
         renderDiff({
@@ -87,7 +109,7 @@ async function main(): Promise<number> {
           cv,
           selection: rendered.selection,
           summary: t.summary,
-          coverNote: t.coverNote,
+          coverNote,
           postingKeywords: t.postingKeywords,
           availability: t.availability,
           route: t.route,
@@ -108,7 +130,7 @@ async function main(): Promise<number> {
         postingId: p.id,
         selection: rendered.selection,
         summary: t.summary,
-        coverNote: t.coverNote,
+        coverNote,
         language: t.language,
         warnings,
         route: t.route,
@@ -138,7 +160,7 @@ async function main(): Promise<number> {
     }
   }
 
-  console.log(`Summary: tailored=${done} failed=${failed}. Review diff.md, then after applying: npm run track -- <id> applied`);
+  console.log(`Summary: tailored=${done} failed=${failed} waitingForDescription=${skipped}. Review diff.md, then after applying: npm run track -- <id> applied`);
   return failed > 0 && done === 0 ? 1 : 0;
 }
 

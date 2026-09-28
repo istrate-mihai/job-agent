@@ -16,6 +16,8 @@ const ProviderSchema = z.discriminatedUnion("kind", [
     baseUrl: z.url(),
     apiKeyEnv: z.string().min(1).nullable(), // null = no auth (local Ollama)
     toolMode: z.enum(["forced", "json"]),
+    // Reasoning models (Groq gpt-oss) spend max_tokens on hidden thinking; "low" leaves room for the JSON answer
+    reasoningEffort: z.enum(["low", "medium", "high"]).optional(),
   }),
   z.object({
     kind: z.literal("anthropic"),
@@ -112,6 +114,16 @@ export const SearchConfigSchema = z.object({
   digest: z.object({
     limit: z.number().int().min(1).max(50),
   }),
+  enrich: z
+    .object({
+      enabled: z.boolean(),
+      // Reads LinkedIn's public logged-out job pages. LinkedIn's terms disallow automated access;
+      // volume is tiny and no account is used, but set false to rely on other sources only.
+      linkedin: z.boolean(),
+      maxPerRun: z.number().int().min(1).max(100),
+      delaySeconds: z.number().min(1).max(30),
+    })
+    .default({ enabled: true, linkedin: true, maxPerRun: 30, delaySeconds: 3 }),
   tailoring: z.object({
     outputDir: z.string().min(1),
     batchSize: z.number().int().min(1).max(20),
@@ -120,6 +132,7 @@ export const SearchConfigSchema = z.object({
     minBullets: z.number().int().min(6).max(40), // below this the PDF looks half-empty; refilled by relevance
     maxDescriptionChars: z.number().int().min(500).max(30_000),
     photoPath: z.string().min(1).nullable(), // null = CV without photo
+    fileNamePrefix: z.string().min(1).nullable().default(null), // null = "<Surname> <Given names>" from master-cv.json
   }),
 });
 

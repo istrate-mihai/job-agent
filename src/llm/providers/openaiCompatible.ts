@@ -8,6 +8,7 @@ export interface OpenAiCompatibleOptions {
   baseUrl: string;
   apiKey: string | null; // null for local Ollama
   toolMode: "forced" | "json"; // "json" for models/hosts without reliable forced tool calls
+  reasoningEffort?: "low" | "medium" | "high";
 }
 
 const ChatResponseSchema = z.object({
@@ -41,8 +42,9 @@ export function openAiCompatibleProvider(opts: OpenAiCompatibleOptions): LlmProv
   return {
     id: opts.id,
     async callTool(call: ProviderCall): Promise<ProviderResult> {
+      const mode = call.mode ?? opts.toolMode;
       const system =
-        opts.toolMode === "json"
+        mode === "json"
           ? `${call.system}\n\nRespond with ONLY a JSON object (no prose, no code fences) that matches this JSON Schema:\n${JSON.stringify(call.jsonSchema)}`
           : call.system;
 
@@ -55,7 +57,8 @@ export function openAiCompatibleProvider(opts: OpenAiCompatibleOptions): LlmProv
           { role: "user", content: call.user },
         ],
       };
-      if (opts.toolMode === "forced") {
+      if (opts.reasoningEffort) body["reasoning_effort"] = opts.reasoningEffort;
+      if (mode === "forced") {
         body["tools"] = [
           { type: "function", function: { name: call.toolName, description: call.toolDescription, parameters: call.jsonSchema } },
         ];

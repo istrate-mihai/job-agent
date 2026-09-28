@@ -92,7 +92,7 @@ async function photoDataUri(path: string | null): Promise<string | null> {
   }
 }
 
-async function htmlToPdf(browser: Browser, html: string, meta: { title: string; author: string }): Promise<{ pdf: Uint8Array; pages: number }> {
+export async function htmlToPdf(browser: Browser, html: string, meta: { title: string; author: string }): Promise<{ pdf: Uint8Array; pages: number }> {
   const page = await browser.newPage();
   try {
     await page.setContent(html, { waitUntil: "load" });

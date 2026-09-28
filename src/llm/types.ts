@@ -17,6 +17,7 @@ export interface ProviderCall {
   jsonSchema: Record<string, unknown>;
   maxTokens: number;
   signal: AbortSignal;
+  mode?: "forced" | "json"; // per-call override: JSON mode after a failed forced tool call
 }
 
 export interface ProviderResult {

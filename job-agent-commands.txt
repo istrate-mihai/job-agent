@@ -9,36 +9,57 @@ WHAT THE APP DOES
      age, blocklisted companies, required languages.
   3. Scores each remaining posting 0-100 against your master CV using free AI (Groq/Gemini):
      apply (70+), maybe (50-69), skip (under 50).
-  4. Shows you a digest. YOU approve or skip each posting.
+  4. Fetches the full job text for alert-email postings and drops closed ones (enrich).
+     Shows you a digest. YOU approve or skip each posting.
   5. For approved postings it builds a tailored CV (PDF), a 3-sentence cover note and a
      review file (diff.md). Bullets are always your own text from master-cv.json.
   6. YOU apply manually, then track the application (applied → interview → offer).
 
 ------------------------------------------------------------------------------------
-DAILY ROUTINE
+DAILY ROUTINE (in this order)
 ------------------------------------------------------------------------------------
-Start + collect + score + digest:
+1) Start + collect + fetch descriptions + score + digest (all automatic):
   cd ~/projects/job-agent && npm run db:up && npm run gmail:check && npm run pipeline
 
-Show skipped postings too:
-  npm run digest -- --all
+   pipeline = ingest → enrich → score → digest
+   enrich fetches the full job text for alert-email postings (LinkedIn, eJobs, BestJobs),
+   drops closed/expired postings, and queues them for re-scoring with the real text.
+   Show skipped postings too:   npm run digest -- --all
+   id = the 8 characters in [brackets] in the digest
 
-Approve / skip (id = the 8 characters in [brackets] in the digest):
+2) Only if a posting still shows "title-only" (the site blocked the fetch):
+  npm run enrich -- --retry                     try again later
+  npm run describe -- <id> jobs/<id>.txt        last resort: paste the job text yourself
+
+3) Decide:
   npm run decide -- <id> approve "reason"
   npm run decide -- <id> skip "reason"
+   Aim for max ~5 approvals per day.
 
-Build tailored CV + cover note for approved postings:
-  npm run tailor
-  npm run tailor -- <id>          (re-tailor one posting)
-  Output: output/applications/<date>_<company>_<title>_<id>/
-          CV PDF, cover-note.txt, diff.md (read this before applying), tailoring.json
+4) Build tailored CV + cover note:
+  npm run tailor                  all approved postings (45 s pause between them)
+  npm run tailor -- <id>          one posting (or re-tailor it)
+  npm run tailor -- <id> --allow-title-only   force it without a description (not advised)
+   Output: output/applications/<date>_<company>_<title>_<id>/
+           Istrate_Mihai_Septimius_<Job_Title>_<Company>_CV.pdf
+           Istrate_Mihai_Septimius_<Job_Title>_<Company>_Cover_Letter.pdf   (upload this)
+           Istrate_Mihai_Septimius_<Job_Title>_<Company>_Cover_Letter.txt   (paste into forms)
+           diff.md (review first), tailoring.json
+   If Groq hits its rate limit: wait 1 minute and run it again.
 
-Track applications:
-  npm run track                                  (board + follow-up reminders after 7 days)
-  npm run track -- <id> applied "via careers page"
+5) Review before applying (always):
+   - diff.md "✖" rows = requirements you don't prove → prepare an honest answer
+   - read the cover letter: correct stack? honest about gaps? no invented claims?
+   - open the PDF
+
+6) Apply yourself on the company site / LinkedIn, then record it:
+  npm run track -- <id> applied "where/how"
+
+7) Follow up:
+  npm run track                   board: what's next per posting, "← follow up" after 7 days
   npm run track -- <id> responded | interview | offer | rejected
 
-Stop the database (data is kept):
+8) Stop the database (data is kept):
   docker compose stop db
 
 ------------------------------------------------------------------------------------
@@ -60,6 +81,9 @@ Check the config and CV data:
 Render your base (untailored) CV:
   npm run cv:base                  → output/Mihai_Septimius_Istrate_CV.pdf
 
+Exclude Java-only roles before scoring (saves AI quota):
+  add java to titles.exclude in config/search-config.yaml, then npm run refilter
+
 After editing titles / locations / blocklist in config/search-config.yaml:
   npm run refilter                 re-check postings rejected under the old rules
 
@@ -74,6 +98,13 @@ Re-authorize Gmail (if you see "invalid_grant"):
 
 After a code update with database changes:
   npm run db:generate && npm run db:migrate
+
+Enrichment: LinkedIn is read through its public logged-out job pages (no account used).
+  Turn it off with  enrich: { enabled: true, linkedin: false, maxPerRun: 30, delaySeconds: 3 }
+  in config/search-config.yaml. "LinkedIn HTTP 999/429" = LinkedIn is throttling; retried next run.
+
+AI errors: 429 = Groq per-minute limit (wait 1 min), 503 = Gemini overloaded (try later),
+"fetch failed" on ollama = not installed (ignored).
 
 AI usage so far:
   docker compose exec db psql -U jobagent -d jobagent -c "SELECT model, count(*) AS calls, sum(input_tokens) AS input, sum(output_tokens) AS output FROM llm_usage GROUP BY 1 ORDER BY 2 DESC;"

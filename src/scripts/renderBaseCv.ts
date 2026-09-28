@@ -3,6 +3,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadSearchConfig } from "../config/searchConfig.js";
+import { namePrefix } from "../cv/fileNames.js";
 import { renderFittedCv } from "../cv/renderPdf.js";
 import { baseSelection } from "../cv/view.js";
 import { loadMasterCv } from "../profile/candidateProfile.js";
@@ -11,7 +12,7 @@ const BASE_AVAILABILITY = "Open to remote roles and to relocation within Romania
 
 const config = await loadSearchConfig();
 const cv = await loadMasterCv();
-const fileName = `${cv.basics.fullName.replace(/\s+/g, "_")}_CV.pdf`;
+const fileName = `${namePrefix(cv, config.tailoring.fileNamePrefix)}_CV.pdf`;
 const outDir = join(config.tailoring.outputDir, "..");
 const outPath = join(outDir, fileName);
 

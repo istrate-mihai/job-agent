@@ -11,6 +11,7 @@ llm:
       kind: openai-compatible
       baseUrl: https://api.groq.com/openai/v1
       apiKeyEnv: GROQ_API_KEY
+      reasoningEffort: low # gpt-oss thinks less, leaving tokens for the JSON answer
       toolMode: forced
     gemini: # free tier via AI Studio; ⚠ free-tier prompts may be used by Google to improve products
       kind: openai-compatible

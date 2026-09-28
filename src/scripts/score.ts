@@ -1,5 +1,5 @@
 // src/scripts/score.ts
-import { eq, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
 import { postingScores, postings } from "../db/schema.js";
@@ -19,12 +19,21 @@ async function main(): Promise<number> {
   const cv = await loadMasterCv();
   const profile = buildCandidateProfile(cv);
 
-  const pending = await db
-    .select()
-    .from(postings)
-    .where(eq(postings.status, "new"))
-    .orderBy(sql`${postings.postedAt} desc nulls last`) // freshest first: early applications matter most
-    .limit(config.scoring.batchSize);
+  const pending = (
+    await db
+      .select({ p: postings })
+      .from(postings)
+      .leftJoin(postingScores, eq(postingScores.postingId, postings.id))
+      .where(
+        or(
+          eq(postings.status, "new"),
+          // approved on a title-only guess, description fetched since: re-score (status stays approved)
+          and(eq(postings.status, "approved"), eq(postingScores.confidence, "low"), sql`length(${postings.description}) >= 300`),
+        ),
+      )
+      .orderBy(sql`${postings.postedAt} desc nulls last`) // freshest first: early applications matter most
+      .limit(config.scoring.batchSize)
+  ).map((r) => r.p);
 
   if (pending.length === 0) {
     console.log("No new postings to score.");
@@ -53,7 +62,7 @@ async function main(): Promise<number> {
       };
       await db.transaction(async (tx) => {
         await tx.insert(postingScores).values(values).onConflictDoUpdate({ target: postingScores.postingId, set: values });
-        await tx.update(postings).set({ status: "scored" }).where(eq(postings.id, posting.id));
+        if (posting.status !== "approved") await tx.update(postings).set({ status: "scored" }).where(eq(postings.id, posting.id));
       });
       scored += 1;
       const conf = s.confidence === "low" ? " (title-only)" : "";
