@@ -85,6 +85,14 @@ export const SearchConfigSchema = z.object({
         }),
       )
       .default([]),
+    // Slug from a careers link: apply.workable.com/<slug>/
+    workable: z.array(z.object({ company: z.string().min(1), slug: z.string().min(1) })).default([]),
+    // Slug from a careers link: <slug>.recruitee.com
+    recruitee: z.array(z.object({ company: z.string().min(1), slug: z.string().min(1) })).default([]),
+    // Slug from a careers link: <slug>.jobs.personio.de (or .com)
+    personio: z
+      .array(z.object({ company: z.string().min(1), slug: z.string().min(1), domain: z.enum(["de", "com"]).default("de") }))
+      .default([]),
     // Public listing pages of job boards (Juniors.ro, Hipo.ro, …), see src/ingest/sources/webBoard.ts
     boards: z
       .array(
@@ -116,7 +124,7 @@ export const SearchConfigSchema = z.object({
   seniority: z.object({ target: z.string().min(1), allow: TermList.min(1) }),
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
-  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever"]),
+  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "workable", "recruitee", "personio"]),
   stackWeights: z.record(z.string(), z.number().min(0).max(1)),
   languageFlags: TermList,
   companies: z.object({ allowlist: TermList, blocklist: TermList }),

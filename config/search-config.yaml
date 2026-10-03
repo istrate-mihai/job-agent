@@ -72,6 +72,13 @@ sources:
   greenhouse: []
   # Slug from a careers link: jobs.lever.co/<slug> (jobs.eu.lever.co/<slug> → region: eu)
   lever: []
+  # Find an employer's feed with: npm run ats:probe -- <careers-page-url | "Company Name">
+  # and paste the printed line here. A wrong slug fails that source every run, so only add probed ones.
+  # Not covered by feeds (no public API): Siemens (Avature), NTT DATA (Phenom), Workday/SuccessFactors
+  # employers → keep LinkedIn/eJobs alerts for them in Gmail.
+  workable: [] # slug from apply.workable.com/<slug>/
+  recruitee: [] # slug from <slug>.recruitee.com
+  personio: [] # slug from <slug>.jobs.personio.de (domain: com for .jobs.personio.com)
   # Public listing pages of Romanian job boards. robots.txt is honored; pages are fetched 2s apart.
   # JSON-LD on the page is used when present, otherwise the extraction LLM reads the page (new links only).
   # eJobs and BestJobs stay on email alerts (gmail above): JS-heavy pages, alerts are more reliable.
