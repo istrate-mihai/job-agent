@@ -72,6 +72,21 @@ sources:
   greenhouse: []
   # Slug from a careers link: jobs.lever.co/<slug> (jobs.eu.lever.co/<slug> → region: eu)
   lever: []
+  # Public listing pages of Romanian job boards. robots.txt is honored; pages are fetched 2s apart.
+  # JSON-LD on the page is used when present, otherwise the extraction LLM reads the page (new links only).
+  # eJobs and BestJobs stay on email alerts (gmail above): JS-heavy pages, alerts are more reliable.
+  boards:
+    - name: juniors # junior/entry focus; overlaps LinkedIn (dedupe handles it)
+      urls:
+        - https://www.juniors.ro/jobs/web-development
+        - https://www.juniors.ro/jobs/programming
+        - https://www.juniors.ro/jobs/devops
+      linkPattern: "^https://(www\\.)?juniors\\.ro/jobs/\\d+"
+    - name: hipo
+      urls:
+        - https://www.hipo.ro/locuri-de-munca/cautajob/IT-Software/Brasov
+        - https://www.hipo.ro/locuri-de-munca/cautajob/IT-Software/Bucuresti
+      linkPattern: "^https://(www\\.)?hipo\\.ro/locuri-de-munca/locuri_de_munca/\\d+/"
 
 locations:
   remoteScopeAllow: [worldwide, anywhere, global, europe, emea, eu, eea, romania, cet]

@@ -41,7 +41,7 @@ export function gmailSource(config: SearchConfig): JobSource {
       for (const id of freshIds) {
         const { data } = await gmail.users.messages.get({ userId: "me", id, format: "full" }, { signal });
         const email = parseMessage(data);
-        const jobs = await extractJobs(email, config, signal); // budget + kill switch checked inside the router
+        const jobs = await extractJobs({ kind: "email", ...email }, config, signal); // budget + kill switch checked inside the router
 
         for (const job of jobs) {
           const url = await resolveJobUrl(job.url, signal);

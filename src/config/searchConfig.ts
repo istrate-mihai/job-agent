@@ -85,6 +85,26 @@ export const SearchConfigSchema = z.object({
         }),
       )
       .default([]),
+    // Public listing pages of job boards (Juniors.ro, Hipo.ro, …), see src/ingest/sources/webBoard.ts
+    boards: z
+      .array(
+        z
+          .object({
+            name: z.string().regex(/^[a-z0-9-]{2,20}$/, "lowercase letters, digits, dashes; max 20"),
+            enabled: z.boolean().default(true),
+            urls: z.array(z.url()).min(1).max(10), // ⚡ Perf/politeness: a handful of filtered listing pages per board
+            linkPattern: z.string().min(1), // regex an absolute posting URL must match
+            extract: z.enum(["auto", "json-ld", "llm"]).default("auto"), // auto: JSON-LD if present, else LLM
+          })
+          .superRefine((b, ctx) => {
+            try {
+              new RegExp(b.linkPattern);
+            } catch {
+              ctx.addIssue({ code: "custom", path: ["linkPattern"], message: "invalid regular expression" });
+            }
+          }),
+      )
+      .default([]),
   }),
   locations: z.object({
     remoteScopeAllow: TermList.min(1),
