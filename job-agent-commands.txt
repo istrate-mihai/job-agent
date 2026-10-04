@@ -127,3 +127,10 @@ Add an employer's careers feed (Greenhouse, Lever, SmartRecruiters, Workable, Re
   npm run ats:probe -- https://company.com/careers "Company Name"
   paste the printed "✔" line into config/search-config.yaml under the matching source, then npm run ingest
   "uses Workday/Avature/Phenom…" = no public feed: set a LinkedIn alert for that company instead
+
+Add a job found outside the pipeline (recruiter email, Facebook group, poster, referral):
+  save the job text to jobs/<name>.txt, then
+  npm run add -- "Company" "Job Title" --file jobs/<name>.txt --location "City" --mode hybrid --url mailto:hr@company.ro
+  → scored immediately; then npm run decide -- <id> approve && npm run tailor -- <id>
+  Already applied without the agent (no description needed):
+  npm run add -- "Accenture" "Full Stack Developer" --applied "Accenture careers" && npm run track -- <id> rejected "note"
