@@ -146,7 +146,11 @@ main()
     process.exitCode = code;
   })
   .catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : err);
+    // Drizzle wraps driver errors: the real reason (ECONNREFUSED, constraint, enum…) is in `cause`
+    const cause = err instanceof Error && err.cause instanceof Error ? err.cause : null;
+    const message = err instanceof Error ? err.message.split("\nparams:")[0] : String(err);
+    console.error(cause ? `${message}\n→ ${cause.message}` : message);
+    if (cause && "code" in cause && cause.code === "ECONNREFUSED") console.error("Database is not running: npm run db:up");
     process.exitCode = 1;
   })
   .finally(() => pool.end());
