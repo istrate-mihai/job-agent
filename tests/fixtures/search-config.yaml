@@ -93,7 +93,8 @@ titles:
 
 seniority:
   target: mid
-  allow: [junior-mid, mid, mid-senior]
+  allow: [junior, junior-mid, mid, mid-senior]
+  belowLevel: accept # junior or lower-paid roles are never scored down; you decide
 
 maxPostingAgeDays: 14
 

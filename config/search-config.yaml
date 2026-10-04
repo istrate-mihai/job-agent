@@ -115,7 +115,8 @@ titles:
 
 seniority:
   target: mid
-  allow: [junior-mid, mid, mid-senior]
+  allow: [junior, junior-mid, mid, mid-senior]
+  belowLevel: accept # junior or lower-paid roles are never scored down; you decide
 
 maxPostingAgeDays: 14
 
@@ -145,7 +146,7 @@ scoring:
   reviewThreshold: 50 # >= this → "maybe", below → "skip"
   batchSize: 25 # postings scored per run (free tiers: keep modest)
   maxDescriptionChars: 6000 # ⚡ Perf: long postings are mostly boilerplate after this
-  careerGoals: "Mid-level full-stack roles on PHP/Laravel, Node.js/TypeScript, Vue or React; growth toward DevOps and LLM/agentic systems."
+  careerGoals: "Full-stack roles from junior to mid level on PHP/Laravel, Node.js/TypeScript, Vue or React; growth toward DevOps and LLM/agentic systems."
 
 digest:
   limit: 10 # postings shown per digest

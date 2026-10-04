@@ -121,7 +121,11 @@ export const SearchConfigSchema = z.object({
     tierB: z.array(CitySchema),
   }),
   titles: z.object({ include: TermList.min(1), exclude: TermList }),
-  seniority: z.object({ target: z.string().min(1), allow: TermList.min(1) }),
+  seniority: z.object({
+    target: z.string().min(1),
+    allow: TermList.min(1),
+    belowLevel: z.enum(["accept", "penalize"]).default("accept"), // accept: junior/lower-paid roles score like level matches
+  }),
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
   ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "workable", "recruitee", "personio"]),

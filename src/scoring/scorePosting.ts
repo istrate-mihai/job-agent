@@ -19,11 +19,17 @@ const LLM_SCORE_SCHEMA = z.object({
   reasoning: z.string().min(1).transform((v) => v.slice(0, 700)),
 });
 
+// The candidate decides whether junior or lower-paid roles are worth it; scoring must not quietly bury them
+const BELOW_LEVEL_RULE = {
+  accept: "junior or lower-paid roles are fully acceptable: give seniorityFit 15 and never count seniority level or pay as a gap or a reason to skip.",
+  penalize: "lower seniorityFit when the role is clearly junior.",
+} as const;
+
 const SYSTEM_PROMPT = `You evaluate how well ONE job posting fits ONE candidate. Be strict and evidence-based: only credit what the candidate profile actually shows.
 Score these components as integers:
 - mustHaveCoverage (0-40): share of the posting's REQUIRED skills and experience the candidate demonstrably has. A skill listed as "in training only" counts as a gap.
 - stackOverlap (0-20): overlap between the posting's main stack and the candidate's practical stack, weighted by the candidate's stack priorities.
-- seniorityFit (0-15): 15 when the required experience matches the candidate's; lower when the role clearly asks for more (e.g. 6+ years, lead or architect duties) or is clearly junior.
+- seniorityFit (0-15): 15 when the required experience matches the candidate's; lower when the role clearly asks for more (e.g. 6+ years, lead or architect duties). For roles below the candidate's level, follow the below-level rule in candidate_priorities.
 - goalAlignment (0-10): how much the role builds toward the candidate's career goals.
 seniorityMatch: "over" = role asks for more than the candidate has, "under" = role is below the candidate's level, "match" otherwise.
 primaryStack: the posting's main technologies in a few words (e.g. "PHP/Laravel + Vue", ".NET/C#").
@@ -85,7 +91,7 @@ export async function scorePosting(
     system: SYSTEM_PROMPT,
     user: [
       `<candidate>\n${profile.text}\n</candidate>`,
-      `<candidate_priorities>\nStack weights (0-1): ${priorities}\nTarget seniority: ${config.seniority.target}\nCareer goals: ${config.scoring.careerGoals}\n</candidate_priorities>`,
+      `<candidate_priorities>\nStack weights (0-1): ${priorities}\nTarget seniority: ${config.seniority.target}\nBelow-level rule: ${BELOW_LEVEL_RULE[config.seniority.belowLevel]}\nCareer goals: ${config.scoring.careerGoals}\n</candidate_priorities>`,
       // ⚠ Security: posting text is delimited and treated as data; scoring can only return numbers and labels
       `<job_posting company="${attr(posting.company)}" title="${attr(posting.title)}" location="${attr(posting.locationText)}" work_mode="${posting.workMode}">\n${
         titleOnly ? "(no description available: title-only job alert)" : description.slice(0, config.scoring.maxDescriptionChars)

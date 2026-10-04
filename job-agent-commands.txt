@@ -57,6 +57,7 @@ DAILY ROUTINE (in this order)
 
 7) Follow up:
   npm run track                   board: what's next per posting, "← follow up" after 7 days
+  npm run score -- --rescore-under   re-score postings marked below level (junior) under the old rule
   npm run track -- <id> responded | interview | offer | rejected
 
 8) Stop the database (data is kept):
