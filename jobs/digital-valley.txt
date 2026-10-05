@@ -1,0 +1,38 @@
+Digital Valley by IPP Group — Full Stack Developer (Mid & Senior), București, Hybrid
+Aplică: recrutare@in.store.ro
+
+Căutăm 2 Full Stack Developers care să construiască aplicații și platforme digitale cu impact direct în business.
+Construiești aplicații reale cu impact în business. Automatizezi și digitalizezi procese operaționale. Lucrezi direct cu utilizatori interni și transformi nevoile în soluții software.
+
+Ce vei face:
+- Dezvolți end-to-end aplicații și platforme web
+- Înțelegi procesele de business și identifici oportunități de digitalizare
+- Transformi nevoile utilizatorilor în soluții tehnice funcționale
+- Lucrezi pe frontend, backend, baze de date și integrări API
+- Folosești Claude Code și alți AI coding agents pentru development, refactoring, debugging și testing
+- Validezi codul asistat de AI și ai ownership asupra calității soluției
+- Contribui la deployment, monitorizare și îmbunătățirea continuă a aplicațiilor
+Pentru nivelul Senior: responsabilitate pe arhitectură, decizii de stack și infrastructură, code review și suport tehnic pentru developerul Mid.
+
+Ce căutăm:
+- Experiență în dezvoltare Full Stack
+- JavaScript / TypeScript
+- React / Next.js / Vue sau similar
+- Node.js / Python / PHP sau similar
+- MySQL / PostgreSQL și REST APIs
+- Git și experiență cu deployment
+- Experiență cu Claude Code, Codex, Cursor, GitHub Copilot sau alți AI coding agents
+- Capacitatea de a înțelege și valida codul generat de AI
+- Business acumen și capacitatea de a transforma o problemă de business într-o soluție software
+- Gândire orientată către produs și impact, nu doar task-uri tehnice
+- Engleză tehnică bună
+
+Nice to have:
+- Docker
+- Cloud (AWS / Azure / GCP)
+- CI/CD
+- ERP / CRM / internal tools
+- AI / LLM APIs (OpenAI, Anthropic etc.)
+- Microsoft 365 / Azure AD / SSO
+- DevOps & monitoring
+- Aplicații enterprise
