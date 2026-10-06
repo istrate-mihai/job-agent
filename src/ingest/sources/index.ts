@@ -8,12 +8,13 @@ import { leverSource } from "./lever.js";
 import { personioSource } from "./personio.js";
 import { recruiteeSource } from "./recruitee.js";
 import { remotiveSource } from "./remotive.js";
+import { rssSource } from "./rss.js";
 import { smartRecruitersSource } from "./smartrecruiters.js";
 import { webBoardSource } from "./webBoard.js";
 import { workableSource } from "./workable.js";
 
 export function buildSources(config: SearchConfig): JobSource[] {
-  const { gmail, remotive, jobicy, smartrecruiters, greenhouse, lever, workable, recruitee, personio, boards } = config.sources;
+  const { gmail, remotive, jobicy, smartrecruiters, greenhouse, lever, workable, recruitee, personio, rss, boards } = config.sources;
   return [
     ...(gmail.enabled ? [gmailSource(config)] : []),
     ...(remotive.enabled ? [remotiveSource(remotive.categories)] : []),
@@ -24,6 +25,7 @@ export function buildSources(config: SearchConfig): JobSource[] {
     ...workable.map((w) => workableSource(w.company, w.slug)),
     ...recruitee.map((r) => recruiteeSource(r.company, r.slug)),
     ...personio.map((p) => personioSource(p.company, p.slug, p.domain)),
+    ...rss.filter((r) => r.enabled).map((r) => rssSource(r.name, r.url)),
     ...boards.filter((b) => b.enabled).map((b) => webBoardSource(b, config)),
   ];
 }

@@ -102,7 +102,7 @@ Contact details (name, email, phone, links) are never sent to LLM providers; the
 config/search-config.yaml   what to search: sources, titles, locations, LLM routes, thresholds
 data/master-cv.json         the fact bank (gitignored) — the only source of CV content
 src/
-  ingest/        sources (gmail, remotive, jobicy, smartrecruiters, greenhouse, lever, workable, recruitee, personio, job-board pages), enrichment
+  ingest/        sources (gmail, remotive, jobicy, smartrecruiters, greenhouse, lever, workable, recruitee, personio, RSS feeds, job-board pages), enrichment
   filter/        deterministic hard filter
   llm/           provider router, OpenAI-compatible + Anthropic adapters, usage logging
   scoring/       LLM fit scoring (total computed in code)

@@ -93,6 +93,8 @@ export const SearchConfigSchema = z.object({
     personio: z
       .array(z.object({ company: z.string().min(1), slug: z.string().min(1), domain: z.enum(["de", "com"]).default("de") }))
       .default([]),
+    // Public, attribution-only RSS feeds (We Work Remotely category feeds, …), see src/ingest/sources/rss.ts
+    rss: z.array(z.object({ name: z.string().min(1), url: z.url(), enabled: z.boolean().default(true) })).default([]),
     // Public listing pages of job boards (Juniors.ro, Hipo.ro, …), see src/ingest/sources/webBoard.ts
     boards: z
       .array(

@@ -79,9 +79,18 @@ sources:
   workable: [] # slug from apply.workable.com/<slug>/
   recruitee: [] # slug from <slug>.recruitee.com
   personio: [] # slug from <slug>.jobs.personio.de (domain: com for .jobs.personio.com)
-  # Public listing pages of Romanian job boards. robots.txt is honored; pages are fetched 2s apart.
+  # Public, attribution-only RSS feeds. No robots.txt concern: these are published for reuse.
+  # Wellfound/AngelList has no public API and blocks scraping (robots.txt + Cloudflare) — not worth fighting;
+  # most of its startup postings also surface via greenhouse/lever/workable above.
+  rss:
+    - { name: weworkremotely-fullstack, url: https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss }
+    - { name: weworkremotely-backend, url: https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss }
+    - { name: weworkremotely-frontend, url: https://weworkremotely.com/categories/remote-front-end-programming-jobs.rss }
+    - { name: weworkremotely-devops, url: https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss }
+  # Public listing pages of job boards. robots.txt is honored; pages are fetched 2s apart.
   # JSON-LD on the page is used when present, otherwise the extraction LLM reads the page (new links only).
   # eJobs and BestJobs stay on email alerts (gmail above): JS-heavy pages, alerts are more reliable.
+  # Undelucram.ro is a salary/review site, not a job board — not worth scraping for postings.
   boards:
     - name: juniors # junior/entry focus; overlaps LinkedIn (dedupe handles it)
       urls:
@@ -94,6 +103,12 @@ sources:
         - https://www.hipo.ro/locuri-de-munca/cautajob/IT-Software/Brasov
         - https://www.hipo.ro/locuri-de-munca/cautajob/IT-Software/Bucuresti
       linkPattern: "^https://(www\\.)?hipo\\.ro/locuri-de-munca/locuri_de_munca/\\d+/"
+    - name: devjob # DevJobRomania: Romanian tech-only board, filterable by stack/city
+      urls:
+        - https://devjob.ro/jobs/all/Brasov
+        - https://devjob.ro/jobs/all/Bucuresti
+      linkPattern: "^https://(www\\.)?devjob\\.ro/jobs/[^/]+-[^/]+"
+      extract: auto
 
 locations:
   remoteScopeAllow: [worldwide, anywhere, global, europe, emea, eu, eea, romania, cet]
