@@ -62,7 +62,7 @@ sources:
   gmail:
     enabled: true
     # Senders of your job-alert emails. Check the "From" of one real alert per board and adjust.
-    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com) -from:noutati-companii@mta.ejobs.ro"
+    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com) -from:noutati-companii@mta.ejobs.ro"
     lookbackDays: 7
     maxMessages: 30
   remotive:
