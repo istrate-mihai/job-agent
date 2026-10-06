@@ -61,10 +61,10 @@ sources:
     - { company: Endava, companyId: Endava, country: ro }
   gmail:
     enabled: true
-    # Senders of your job-alert emails. Check the "From" of one real alert per board and adjust.
-    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com) -from:noutati-companii@mta.ejobs.ro"
+    # Added more senders for global and local platforms
+    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com OR glassdoor.com OR wellfound.com OR joburiit.ro OR devjob.ro OR hipo.ro OR jobradar24.ro OR talent.com) -from:noutati-companii@mta.ejobs.ro"
     lookbackDays: 7
-    maxMessages: 30
+    maxMessages: 50
   remotive:
     enabled: true
     categories: [software-dev]
@@ -109,6 +109,44 @@ sources:
         - https://devjob.ro/jobs/all/Bucuresti
       linkPattern: "^https://(www\\.)?devjob\\.ro/jobs/[^/]+-[^/]+"
       extract: auto
+    - name: joburiit
+      urls:
+        - https://joburiit.ro/jobs/
+        - https://joburiit.ro/jobs/page/2/
+        - https://joburiit.ro/jobs/page/3/
+      linkPattern: "^https://joburiit\\.ro/job/"
+      extract: auto
+    - name: jobradar24
+      urls:
+        - https://www.jobradar24.ro/locuri-de-munca
+        - https://www.jobradar24.ro/locuri-de-munca?page=2
+        - https://www.jobradar24.ro/locuri-de-munca?page=3
+        - https://www.jobradar24.ro/locuri-de-munca?page=4
+      linkPattern: "^https://www\\.jobradar24\\.ro/locuri-de-munca/"
+      extract: auto
+
+    - name: talent
+      urls:
+        - https://ro.talent.com/en/jobs?k=full+stack+developer
+        - https://ro.talent.com/en/jobs?k=full+stack+developer&p=2
+        - https://ro.talent.com/en/jobs?k=full+stack+developer&p=3
+        - https://ro.talent.com/en/jobs?k=php+laravel
+        - https://ro.talent.com/en/jobs?k=node.js
+      linkPattern: "^https://ro\\.talent\\.com/view\\?id="
+      extract: auto
+
+    # ejobs and bestjobs are already covered by Gmail alerts.
+    # If you want to add them as boards anyway (they are JS-heavy), use:
+    # - name: ejobs
+    #   urls:
+    #     - https://www.ejobs.ro/user/locuri-de-munca
+    #   linkPattern: "^https://www\\.ejobs\\.ro/user/locuri-de-munca/"
+    #   extract: llm
+    # - name: bestjobs
+    #   urls:
+    #     - https://www.bestjobs.eu/locuri-de-munca
+    #   linkPattern: "^https://www\\.bestjobs\\.eu/locuri-de-munca/"
+    #   extract: llm
 
 locations:
   remoteScopeAllow: [worldwide, anywhere, global, europe, emea, eu, eea, romania, cet]
