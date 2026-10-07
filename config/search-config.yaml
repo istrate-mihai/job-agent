@@ -83,10 +83,10 @@ sources:
   # Wellfound/AngelList has no public API and blocks scraping (robots.txt + Cloudflare) — not worth fighting;
   # most of its startup postings also surface via greenhouse/lever/workable above.
   rss:
-    - { name: weworkremotely-fullstack, url: https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss }
-    - { name: weworkremotely-backend, url: https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss }
-    - { name: weworkremotely-frontend, url: https://weworkremotely.com/categories/remote-front-end-programming-jobs.rss }
-    - { name: weworkremotely-devops, url: https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss }
+    - { name: weworkremotely-fullstack, url: https://weworkremotely.com/..., enabled: false }
+    - { name: weworkremotely-backend, url: https://weworkremotely.com/..., enabled: false }
+    - { name: weworkremotely-frontend, url: https://weworkremotely.com/..., enabled: false }
+    - { name: weworkremotely-devops, url: https://weworkremotely.com/..., enabled: false }
   # Public listing pages of job boards. robots.txt is honored; pages are fetched 2s apart.
   # JSON-LD on the page is used when present, otherwise the extraction LLM reads the page (new links only).
   # eJobs and BestJobs stay on email alerts (gmail above): JS-heavy pages, alerts are more reliable.

@@ -57,6 +57,8 @@ drizzle/
   0002_faithful_falcon.sql
   0003_nasty_ender_wiggin.sql
 jobs/
+  alley.txt
+  aquilon.txt
   capgemini-data-engineer.txt
   digi-romania.txt
   digital-valley.txt
@@ -171,125 +173,104 @@ vitest.config.ts
 <files>
 This section contains the contents of the repository's files.
 
-<file path="jobs/capgemini-data-engineer.txt">
-View Profile
- 
-Employee Login
-Search by Keyword 
-Search by Location 
-Show More Options
- 
-Clear
-Select how often (in days) to receive an alert: 
-7
- 
-Junior Data Engineer
-At Capgemini Engineering, the world leader in engineering services, we bring together a global team of engineers, scientists, and architects to help the world's most innovative companies unleash their potential. From autonomous cars to life-saving robots, our digital and software technology experts think outside the box as they provide unique R&D and engineering services across all industries. Join us for a career full of opportunities. Where you can make a difference. Where no two days are the same.
+<file path="jobs/alley.txt">
+User Experience (UX) Developers at Alley work collaboratively at the intersection of web development, design, and information architecture. Your responsibilities will range from prototyping web products alongside designers to developing and maintaining front-ends for highly trafficked websites.
 
-Your role As a Data Engineer, you will contribute to the development and maintenance of modern data platforms and data pipelines that support business reporting, analytics, and operational processes. Working alongside experienced engineers and stakeholders, you will help build scalable solutions for processing, transforming, and managing data in cloud environments.
+UX Developers at Alley need to be well-rounded technologists, well-versed in the fast-changing landscape of front-end technologies and practices, excited about keeping our team at the cutting edge, and eager to work directly with clients to help them solve interesting and novel business problems.
 
-In this role you will play a key role in:
+Alley is an equal opportunity employer and we seek to increase diversity in the tech industry. We encourage applications from women, Black people, indigenous people, people of color, LGBTQIA+ people, disabled people, and other communities traditionally underrepresented in this field. Read our DEI pledge to learn more about how Alley values diversity, equity and inclusion.
 
-Developing and maintaining data pipelines using Python and AWS services
-Supporting ETL/ELT workflows for ingesting, transforming, and loading data from multiple sources
-Working with structured and semi-structured datasets to ensure data quality and consistency Writing efficient SQL queries and supporting data model design activities
-Collaborating with engineering, analytics, and business teams to understand data requirements
-Monitoring and troubleshooting data pipelines and production data issues
-Contributing to CI/CD processes and automation activities related to data platforms Supporting cloud-based data solutions and participating in continuous improvement initiatives
-Your profile:
-
-Experience with Python development
-Good knowledge of SQL and relational databases
-Hands-on experience with AWS services (such as S3, Lambda, Glue, Redshift, Athena, or similar)
-Understanding of ETL/ELT concepts and data processing workflows
-Familiarity with data pipeline development and maintenance
-Experience working with version control systems such as Git
-Good analytical and problem-solving skills
-Strong communication skills and willingness to learn in a collaborative environment
-Nice to have:
-
-Experience with Apache Airflow
-Knowledge of Spark or PySpark
-Exposure to Data Warehousing concepts Experience with Docker and CI/CD pipelines Familiarity with dbt, Databricks, or cloud-native data platforms
-What you will love about working here?
-
-Scale & Impact: Contribute to innovative digital products and enterprise solutions used by customers and businesses across global markets.
-
-Career Growth: Benefit from structured career paths, with opportunities to expand your expertise across technologies, products, and business domains.
-
-Learning & Development: Access continuous learning programs, technical training, certifications, and hands-on experience with modern cloud and data technologies.
-
-Community & Support: Join a global network of talented engineers, architects, and technology professionals, with a strong culture of collaboration, knowledge sharing, and mentorship.
-
-Flexibility & Balance: Hybrid working policies allow you to manage your time and your work base effectively.
-
-Capgemini is an AI-powered global business and technology transformation partner, delivering tangible business value. We imagine the future of organizations and make it real with AI, technology and people. With our strong heritage of nearly 60 years, we are a responsible and diverse group of over 420,000 team members in more than 50 countries. We deliver end-to-end services and solutions with our deep industry expertise and strong partner ecosystem, leveraging our capabilities across strategy, technology, design, engineering and business operations.
-
-Make it real. | www.capgemini.com
-
-Ref. code:  547439
-Posted on:  Oct 1, 2026
-Experience Level:  Experienced Professionals
-Contract Type:  Permanent
-Location:  Cluj-Napoca, RO Timisoara, RO Bucharest, RO Bucuresti, RO Timisoara, RO Iasi, RO Iasi, RO Bucharest, RO Bucuresti, RO Brasov, RO Bucuresti, RO
-Brand:  Capgemini Engineering
-Professional Community:  Software Engineering
-
-Privacy Policy
-Terms of Use
-Social Media Guidelines
-Legal Information / Mentions Légales
-Our Brands:
-Capgemini
-Capgemini Invent
-Capgemini Engineering
-frog
-Sogeti
-All rights reserved by Capgemini. Copyright © 2025
-</file>
-
-<file path="jobs/digi-romania.txt">
-Company logo for, DIGI Romania.
-DIGI Romania
-
-
-Software Engineer – PHP / Full-Stack
-
-Bucharest, Romania · 19 hours ago · 59 applicants
-
-Promoted by hirer · No response insights available yet
-
-Hybrid
-Full-time
-
-About the job
-We are looking for a talented Software Engineer to join our Engineering team and contribute to the development of applications and services within our Telecom BSS & OSS ecosystems. The role involves designing, developing and maintaining applications within our Telecom BSS & OSS ecosystems, working across the full stack and integrating with a variety of internal and external systems.What You'll Work OnYou’ll be part of a team developing applications and services that are integrated into a larger Telecom BSS & OSS ecosystem.Your work will involve interacting with multiple systems, databases, APIs, and services. The role offers exposure to a broad technology landscape and the opportunity to work on both business-critical applications and technical integration challenges, while collaborating closely with experienced engineers across different areas of the technology organization
-Responsabilities
-Backend & Frontend Development – Work across both backend and frontend components using modern web technologies. 
-Solution Design – Contribute to technical design decisions, architecture discussions and the continuous improvement of our development practices.
-Team Collaboration – Work independently or as part of a development team, depending on the project size and scope.
-Systems Integration – Collaborate with Engineers, DevOps and DBAs to integrate applications and services into the existing ecosystem.
-Technical Problem Solving – Investigate and resolve technical issues and contribute to improving the performance, reliability and maintainability of our applications. 
+For information on our hiring process and what it’s like to work at Alley, please check out our FAQ. If you have any questions about our hiring process, please contact us at hiring@alley.com.
 
 Qualifications
-Strong professional experience with PHP 8. Solid knowledge of Laminas or comparable PHP frameworks (Zend, Symfony, Laravel)
-Strong experience with SQL and Transact-SQL (T-SQL), preferably with Microsoft SQL Server and SQL Server Management Studio (SSMS)
-Good knowledge of JavaScript/jQuery, CSS/Bootstrap
-Strong understanding of Object-Oriented Programming (OOP) and Design Patterns.
-Strong understanding of Caching mechanisms.
-Experience working with APIs and integration technologies such as REST, SOAP and JSON-RPC.
-Experience with messaging technologies such as RabbitMQ and Kafka.
-Good understanding of software development best practices and writing maintainable, quality code. 
-Strong analytical and problem – solving skills.
-Ability to work effectively both independently and as part of a team.
 
-Nice to Have
-Experience with microservices architectures and distributes systems;
-Knowlwdge of DevOps practices and CI/CD pipelines.
-Familiarity withLinux (Debian/CentOS) and Docker.
-Experience withTelecom BSS/OSS, ERP systems, or similar complex enterprise environments.
-Familiarity with OAuth 2.0 and OpenID Connect (OIDC).
-Good written and spoken English.
+This is not an entry-level position. We expect candidates to have some professional experience writing software. Seasoned developers will flourish with our balance of independence and support, while entry-level developers would not get the direct oversight they need to succeed.
+You like to think critically and theoretically about human-computer interactions. JavaScript is our language of choice for building these interactions, so we’ll ask that you are fluent and can build front-end components using native DOM APIs (such as element creation, querying, and manipulation, events and event handling, and data fetching) and have done so in a professional context.
+Our primary server-side development language is PHP. While not required, it would be beneficial if you are experienced in PHP and have worked with it in a professional context before.
+You share our passion for making the web indexable and accessible through a deep and practical understanding of semantic HTML5 and have worked with it in a professional context before.
+Translating designs into CSS is one of our core services to clients. It’s important you have an understanding of modern concepts such as flexbox, CSS Custom Properties, and CSS Grid. You also are familiar with CSS preprocessors, their syntax, and their usage.
+You are comfortable with modern ES standards and understand transpilers and module bundlers. Familiarity with Node.js and webpack are not requirements, but are a big plus.
+Maintainable code makes a maintainable website, part of which is separating presentation and business logic and creating clean, organized front-end templates to do it. Understanding of React components, JSX, and PHP Templating are a big plus.
+Alley takes site performance seriously—sites should be beautiful and usable, but also fast. You’re familiar with front-end speed and performance concerns and you know common strategies to alleviate them.
+Users access sites in unexpected ways, so you should be used to dealing with compatibility issues and checking your work systematically on various devices and browsers.
+You should feel comfortable at a Unix command line, even if you aren’t an expert.
+You must know your way around git and understand version control well, and be able to carry out typical operations with it, including branching, merging, submitting code for peer review, and reviewing your peers’ code yourself.
+Our work almost always uses WordPress as a CMS. Prior experience with WordPress and/or PHP is a major plus.
+We apply Scrum as a development methodology, and broadly endorse Agile as a philosophy. You must be open to working this way as well, and prior experience is a plus.
+You should also have very strong written and verbal communication skills, and the ability to wield them with both team members and clients.
+Discipline concerning delivery dates, stylistic appreciation of what makes code good and readable, and a committed attitude about documentation, user stories, issue tracking, and timesheets are all very important skills for our developers to have.
+Open to residents of USA & Canada only
+Benefits
+
+Competitive salaries – We recognize several levels of career progression for developers and tie compensation to those levels corresponding to their seniority and experience. The full range of salaries for these roles is $85k-105k, and we are currently searching for developer candidates to join us in an assortment of roles with base salaries starting at $85k and $90k. If you consider yourself to be at a higher level, we still encourage you to apply and can discuss additional opportunities with you!
+Medical, dental and vision benefits (US Only)
+401k with company matching (US Only)
+Profit sharing
+Monthly lunch allowance
+Flexible time off policy
+Remote first – We are a fully distributed company, meaning we don’t have a set work location. Team members can choose to work from home or from a co-working space. We’ll furnish your home office or rent you a co-working space.
+Recruiters: Please do NOT contact us about this job. All hiring duties at Alley are carried out by our staff.
+</file>
+
+<file path="jobs/aquilon.txt">
+About the Company
+
+Aquilon Labs builds institutional-grade infrastructure for digital asset markets. We connect institutional borrowers, lenders, investors and custodians so they can access digital asset lending, financing, custody and liquidity with the controls, transparency and compliance they expect from traditional finance.
+
+We are building in a fast-moving market where trust, execution, and institutional relationships matter.
+
+Position Overview
+
+We are hiring a full-stack engineer who is equally comfortable writing a Solidity contract, designing a backend service and building the interfaces institutions use every day. As one of our first five engineers, you will build products for institutional lending and digital asset trading, owning features from idea to production across smart contracts, APIs, data pipelines and web apps.
+
+You will work closely with product, business and risk teams to turn complex financial workflows into software. Our products move real client funds, so we care deeply about security, correctness and reliability.
+
+Joining this early means real ownership, direct access to leadership and clients, and a big say in our architecture, tooling and engineering culture. AI tools are a core part of how we build, and we expect you to use them well.
+
+Key Responsibilities
+
+Build client-facing dashboards and internal tools for institutional lending and digital asset trading, providing timely, clear views of portfolios, loan balances, collateral, and transaction activity.
+Develop credit and lending workflows across loan applications, credit assessment and approval processes, funding, interest accrual, repayments, and ongoing servicing.
+Build and integrate trading and exchange systems, covering market data, order management, execution connectivity, and settlement.
+Design, implement, test, and deploy Solidity smart contracts on Ethereum and other EVM networks for lending and collateral management, including oracle integrations, interest-rate models, and liquidation logic.
+Integrate wallets, custodians, and external platforms to support secure transaction signing, contract interactions, and transaction tracking.
+Build backend services, APIs, and data pipelines for on-chain indexing, event processing, and reliable synchronization and reconciliation between on-chain and off-chain systems.
+Implement collateral valuation, loan-to-value and exposure monitoring, margin-call workflows, and alerts for critical lending and trading events.
+Develop access controls, approval workflows, audit trails, and reporting to support institutional operations, risk oversight, and compliance.
+Collaborate with product, design, business, risk, and compliance teams to translate client needs into technical requirements and deliver features through production.
+Maintain engineering quality through code reviews, automated testing, CI/CD, and documentation. Support security audits, monitor production systems, and resolve reliability, performance, and security issues.
+Use AI coding assistants and agents to accelerate development, testing, and debugging while validating outputs for correctness, security, and maintainability.
+Qualifications
+
+3+ years of software engineering experience, with hands-on frontend and backend work and a track record of shipping production applications.
+Solid understanding of blockchain fundamentals: Ethereum, the EVM, wallets, transaction signing, gas, RPCs and on-chain events.
+Practical experience developing, testing and deploying Solidity smart contracts with Foundry or Hardhat.
+Strong JavaScript/TypeScript skills and experience with React and Next.js or a similar framework.
+Proficiency in at least one backend stack (Node.js/TypeScript, Python or Go), including API design, database modeling and authentication.
+Experience connecting applications to smart contracts with viem or ethers.js.
+Knowledge of common smart contract vulnerabilities, such as reentrancy, access control flaws, signature replay and oracle manipulation.
+Daily use of AI development tools, and the ability to explain how you validate generated code.
+Strong ownership, problem-solving and communication skills in a fast-moving team.
+Preferred Background
+
+Experience building dApps, DeFi lending or borrowing protocols, stablecoins, payments, wallets or tokenization platforms.
+Open-source contributions, or participation in smart contract security reviews and audits.
+Experience with cloud infrastructure (AWS or GCP), Docker, CI/CD, distributed systems or blockchain data indexing.
+Experience integrating LLM APIs, AI agents or automated workflows into products.
+Experience in fintech, trading or institutional financial products.
+Compensation and Engagement Structure
+
+Compensation will be structured based on experience, scope of responsibility, and level of engagement. The package may include cash compensation and, where applicable, equity participation.
+
+Work Location
+
+This role is remote within the United States, with the option to work hybrid from our New York office. Strong candidates outside the US with relevant experience will also be considered.
+
+Application Process
+
+Please send your resume along with GitHub profile, portfolio, or relevant project links to team@aquilonlabs.com. Please include a brief description of a full-stack or blockchain project you have built and how you use AI tools in your development workflow.
+
+Work Location: Remote
 </file>
 
 <file path=".github/workflows/ci.yml">
@@ -2277,6 +2258,127 @@ CREATE TABLE "tailorings" (
 ALTER TABLE "status_events" ADD CONSTRAINT "status_events_posting_id_postings_id_fk" FOREIGN KEY ("posting_id") REFERENCES "public"."postings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tailorings" ADD CONSTRAINT "tailorings_posting_id_postings_id_fk" FOREIGN KEY ("posting_id") REFERENCES "public"."postings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "status_events_posting_id_idx" ON "status_events" USING btree ("posting_id");
+</file>
+
+<file path="jobs/capgemini-data-engineer.txt">
+View Profile
+ 
+Employee Login
+Search by Keyword 
+Search by Location 
+Show More Options
+ 
+Clear
+Select how often (in days) to receive an alert: 
+7
+ 
+Junior Data Engineer
+At Capgemini Engineering, the world leader in engineering services, we bring together a global team of engineers, scientists, and architects to help the world's most innovative companies unleash their potential. From autonomous cars to life-saving robots, our digital and software technology experts think outside the box as they provide unique R&D and engineering services across all industries. Join us for a career full of opportunities. Where you can make a difference. Where no two days are the same.
+
+Your role As a Data Engineer, you will contribute to the development and maintenance of modern data platforms and data pipelines that support business reporting, analytics, and operational processes. Working alongside experienced engineers and stakeholders, you will help build scalable solutions for processing, transforming, and managing data in cloud environments.
+
+In this role you will play a key role in:
+
+Developing and maintaining data pipelines using Python and AWS services
+Supporting ETL/ELT workflows for ingesting, transforming, and loading data from multiple sources
+Working with structured and semi-structured datasets to ensure data quality and consistency Writing efficient SQL queries and supporting data model design activities
+Collaborating with engineering, analytics, and business teams to understand data requirements
+Monitoring and troubleshooting data pipelines and production data issues
+Contributing to CI/CD processes and automation activities related to data platforms Supporting cloud-based data solutions and participating in continuous improvement initiatives
+Your profile:
+
+Experience with Python development
+Good knowledge of SQL and relational databases
+Hands-on experience with AWS services (such as S3, Lambda, Glue, Redshift, Athena, or similar)
+Understanding of ETL/ELT concepts and data processing workflows
+Familiarity with data pipeline development and maintenance
+Experience working with version control systems such as Git
+Good analytical and problem-solving skills
+Strong communication skills and willingness to learn in a collaborative environment
+Nice to have:
+
+Experience with Apache Airflow
+Knowledge of Spark or PySpark
+Exposure to Data Warehousing concepts Experience with Docker and CI/CD pipelines Familiarity with dbt, Databricks, or cloud-native data platforms
+What you will love about working here?
+
+Scale & Impact: Contribute to innovative digital products and enterprise solutions used by customers and businesses across global markets.
+
+Career Growth: Benefit from structured career paths, with opportunities to expand your expertise across technologies, products, and business domains.
+
+Learning & Development: Access continuous learning programs, technical training, certifications, and hands-on experience with modern cloud and data technologies.
+
+Community & Support: Join a global network of talented engineers, architects, and technology professionals, with a strong culture of collaboration, knowledge sharing, and mentorship.
+
+Flexibility & Balance: Hybrid working policies allow you to manage your time and your work base effectively.
+
+Capgemini is an AI-powered global business and technology transformation partner, delivering tangible business value. We imagine the future of organizations and make it real with AI, technology and people. With our strong heritage of nearly 60 years, we are a responsible and diverse group of over 420,000 team members in more than 50 countries. We deliver end-to-end services and solutions with our deep industry expertise and strong partner ecosystem, leveraging our capabilities across strategy, technology, design, engineering and business operations.
+
+Make it real. | www.capgemini.com
+
+Ref. code:  547439
+Posted on:  Oct 1, 2026
+Experience Level:  Experienced Professionals
+Contract Type:  Permanent
+Location:  Cluj-Napoca, RO Timisoara, RO Bucharest, RO Bucuresti, RO Timisoara, RO Iasi, RO Iasi, RO Bucharest, RO Bucuresti, RO Brasov, RO Bucuresti, RO
+Brand:  Capgemini Engineering
+Professional Community:  Software Engineering
+
+Privacy Policy
+Terms of Use
+Social Media Guidelines
+Legal Information / Mentions Légales
+Our Brands:
+Capgemini
+Capgemini Invent
+Capgemini Engineering
+frog
+Sogeti
+All rights reserved by Capgemini. Copyright © 2025
+</file>
+
+<file path="jobs/digi-romania.txt">
+Company logo for, DIGI Romania.
+DIGI Romania
+
+
+Software Engineer – PHP / Full-Stack
+
+Bucharest, Romania · 19 hours ago · 59 applicants
+
+Promoted by hirer · No response insights available yet
+
+Hybrid
+Full-time
+
+About the job
+We are looking for a talented Software Engineer to join our Engineering team and contribute to the development of applications and services within our Telecom BSS & OSS ecosystems. The role involves designing, developing and maintaining applications within our Telecom BSS & OSS ecosystems, working across the full stack and integrating with a variety of internal and external systems.What You'll Work OnYou’ll be part of a team developing applications and services that are integrated into a larger Telecom BSS & OSS ecosystem.Your work will involve interacting with multiple systems, databases, APIs, and services. The role offers exposure to a broad technology landscape and the opportunity to work on both business-critical applications and technical integration challenges, while collaborating closely with experienced engineers across different areas of the technology organization
+Responsabilities
+Backend & Frontend Development – Work across both backend and frontend components using modern web technologies. 
+Solution Design – Contribute to technical design decisions, architecture discussions and the continuous improvement of our development practices.
+Team Collaboration – Work independently or as part of a development team, depending on the project size and scope.
+Systems Integration – Collaborate with Engineers, DevOps and DBAs to integrate applications and services into the existing ecosystem.
+Technical Problem Solving – Investigate and resolve technical issues and contribute to improving the performance, reliability and maintainability of our applications. 
+
+Qualifications
+Strong professional experience with PHP 8. Solid knowledge of Laminas or comparable PHP frameworks (Zend, Symfony, Laravel)
+Strong experience with SQL and Transact-SQL (T-SQL), preferably with Microsoft SQL Server and SQL Server Management Studio (SSMS)
+Good knowledge of JavaScript/jQuery, CSS/Bootstrap
+Strong understanding of Object-Oriented Programming (OOP) and Design Patterns.
+Strong understanding of Caching mechanisms.
+Experience working with APIs and integration technologies such as REST, SOAP and JSON-RPC.
+Experience with messaging technologies such as RabbitMQ and Kafka.
+Good understanding of software development best practices and writing maintainable, quality code. 
+Strong analytical and problem – solving skills.
+Ability to work effectively both independently and as part of a team.
+
+Nice to Have
+Experience with microservices architectures and distributes systems;
+Knowlwdge of DevOps practices and CI/CD pipelines.
+Familiarity withLinux (Debian/CentOS) and Docker.
+Experience withTelecom BSS/OSS, ERP systems, or similar complex enterprise environments.
+Familiarity with OAuth 2.0 and OpenID Connect (OIDC).
+Good written and spoken English.
 </file>
 
 <file path="jobs/digital-valley.txt">
@@ -9818,10 +9920,10 @@ sources:
     - { company: Endava, companyId: Endava, country: ro }
   gmail:
     enabled: true
-    # Senders of your job-alert emails. Check the "From" of one real alert per board and adjust.
-    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com) -from:noutati-companii@mta.ejobs.ro"
+    # Added more senders for global and local platforms
+    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com OR glassdoor.com OR wellfound.com OR joburiit.ro OR devjob.ro OR hipo.ro OR jobradar24.ro OR talent.com) -from:noutati-companii@mta.ejobs.ro"
     lookbackDays: 7
-    maxMessages: 30
+    maxMessages: 50
   remotive:
     enabled: true
     categories: [software-dev]
@@ -9866,6 +9968,44 @@ sources:
         - https://devjob.ro/jobs/all/Bucuresti
       linkPattern: "^https://(www\\.)?devjob\\.ro/jobs/[^/]+-[^/]+"
       extract: auto
+    - name: joburiit
+      urls:
+        - https://joburiit.ro/jobs/
+        - https://joburiit.ro/jobs/page/2/
+        - https://joburiit.ro/jobs/page/3/
+      linkPattern: "^https://joburiit\\.ro/job/"
+      extract: auto
+    - name: jobradar24
+      urls:
+        - https://www.jobradar24.ro/locuri-de-munca
+        - https://www.jobradar24.ro/locuri-de-munca?page=2
+        - https://www.jobradar24.ro/locuri-de-munca?page=3
+        - https://www.jobradar24.ro/locuri-de-munca?page=4
+      linkPattern: "^https://www\\.jobradar24\\.ro/locuri-de-munca/"
+      extract: auto
+
+    - name: talent
+      urls:
+        - https://ro.talent.com/en/jobs?k=full+stack+developer
+        - https://ro.talent.com/en/jobs?k=full+stack+developer&p=2
+        - https://ro.talent.com/en/jobs?k=full+stack+developer&p=3
+        - https://ro.talent.com/en/jobs?k=php+laravel
+        - https://ro.talent.com/en/jobs?k=node.js
+      linkPattern: "^https://ro\\.talent\\.com/view\\?id="
+      extract: auto
+
+    # ejobs and bestjobs are already covered by Gmail alerts.
+    # If you want to add them as boards anyway (they are JS-heavy), use:
+    # - name: ejobs
+    #   urls:
+    #     - https://www.ejobs.ro/user/locuri-de-munca
+    #   linkPattern: "^https://www\\.ejobs\\.ro/user/locuri-de-munca/"
+    #   extract: llm
+    # - name: bestjobs
+    #   urls:
+    #     - https://www.bestjobs.eu/locuri-de-munca
+    #   linkPattern: "^https://www\\.bestjobs\\.eu/locuri-de-munca/"
+    #   extract: llm
 
 locations:
   remoteScopeAllow: [worldwide, anywhere, global, europe, emea, eu, eea, romania, cet]
