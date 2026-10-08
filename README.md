@@ -188,6 +188,8 @@ You can re-import any time from the Setup page or with `npm run cv:import -- pat
 
 ### Gmail job alerts (optional, 5 minutes)
 
+![Setup page: CV import, Gmail connection, AI keys, database and search cities in one place](docs/screenshot-setup.png)
+
 With Gmail connected, alert emails from LinkedIn, eJobs, BestJobs and Indeed become postings automatically, and
 recruiter emails can be saved as Gmail drafts. Google requires your own small (free) Cloud project for this.
 In the app: **Setup → Gmail job alerts** shows the five steps with direct links:
