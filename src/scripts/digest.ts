@@ -1,8 +1,9 @@
 // src/scripts/digest.ts
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
 import { decisions, postingScores, postings } from "../db/schema.js";
+import { normalizeText } from "../ingest/text.js";
 
 const DAY_MS = 86_400_000;
 const showAll = process.argv.includes("--all"); // include "skip" recommendations
@@ -12,6 +13,11 @@ function freshnessBonus(postedAt: Date | null, now: Date): number {
   const days = (now.getTime() - postedAt.getTime()) / DAY_MS;
   return days <= 2 ? 5 : days <= 5 ? 2 : 0; // early applications get read first
 }
+
+// Same job reposted on another board (or with "Bucharest" vs "Bucharest, Romania") gets a new dedupe hash
+const canon = (v: string): string => normalizeText(v).replace(/[^a-z0-9+#]+/g, " ").trim(); // "–" vs "-", "PHP / Full-Stack"
+const jobKey = (company: string, title: string): string => `${canon(company)}|${canon(title)}`;
+const HANDLED = ["approved", "tailored", "applied", "responded", "interview", "offer", "rejected", "skipped"] as const;
 
 function age(postedAt: Date | null, now: Date): string {
   if (postedAt === null) return "date unknown";
@@ -29,13 +35,44 @@ async function main(): Promise<void> {
     .innerJoin(postingScores, eq(postingScores.postingId, postings.id))
     .where(showAll ? eq(postings.status, "scored") : and(eq(postings.status, "scored"), ne(postingScores.recommendation, "skip")));
 
-  const ranked = rows
+  // Auto-skip postings you already handled under another id; keep only the best-scored copy of the rest
+  const handled = await db
+    .select({ id: postings.id, company: postings.company, title: postings.title, status: postings.status })
+    .from(postings)
+    .where(inArray(postings.status, [...HANDLED]));
+  const handledByKey = new Map(handled.map((h) => [jobKey(h.company, h.title), h]));
+  const autoSkipped: string[] = [];
+  const fresh: typeof rows = [];
+  for (const r of rows) {
+    const twin = handledByKey.get(jobKey(r.p.company, r.p.title));
+    if (twin === undefined) {
+      fresh.push(r);
+      continue;
+    }
+    const reason = `duplicate of ${twin.id.slice(0, 8)} (${twin.status})`;
+    await db.transaction(async (tx) => {
+      await tx.insert(decisions).values({ postingId: r.p.id, decision: "skip", reason, scoreAtDecision: r.s.total });
+      await tx.update(postings).set({ status: "skipped" }).where(eq(postings.id, r.p.id));
+    });
+    autoSkipped.push(`${r.p.company} — ${r.p.title}: ${reason}`);
+  }
+  const bestByKey = new Map<string, (typeof rows)[number]>();
+  for (const r of fresh) {
+    const key = jobKey(r.p.company, r.p.title);
+    const prev = bestByKey.get(key);
+    if (prev === undefined || r.s.total > prev.s.total) bestByKey.set(key, r);
+  }
+  const hiddenDuplicates = fresh.length - bestByKey.size;
+
+  const ranked = [...bestByKey.values()]
     .map((r) => ({
       ...r,
       rank: r.s.total + freshnessBonus(r.p.postedAt, now) + (r.p.flags.includes("allowlist-company") ? 5 : 0),
     }))
     .sort((a, b) => b.rank - a.rank)
     .slice(0, config.digest.limit);
+
+  if (autoSkipped.length > 0) console.log(`Auto-skipped ${autoSkipped.length} duplicate(s):\n  ${autoSkipped.join("\n  ")}`);
 
   if (ranked.length === 0) {
     console.log("Nothing to review. Run: npm run ingest && npm run score");
@@ -71,7 +108,7 @@ async function main(): Promise<void> {
     .from(decisions)
     .groupBy(decisions.decision);
 
-  console.log(`\nAwaiting review: apply=${counts?.apply ?? 0} maybe=${counts?.maybe ?? 0} skip=${counts?.skip ?? 0}${showAll ? "" : " (skips hidden, use --all)"}`);
+  console.log(`\nAwaiting review: apply=${counts?.apply ?? 0} maybe=${counts?.maybe ?? 0} skip=${counts?.skip ?? 0}${showAll ? "" : " (skips hidden, use --all)"}${hiddenDuplicates > 0 ? `, ${hiddenDuplicates} duplicate repost(s) hidden` : ""}`);
   if (calibration.length > 0) {
     // if approved and skipped averages are close, the scoring isn't separating good from bad yet
     console.log(`Your decisions: ${calibration.map((c) => `${c.decision}=${c.n} (avg score ${c.avgScore ?? "n/a"})`).join(", ")}`);

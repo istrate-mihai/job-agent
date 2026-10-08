@@ -62,7 +62,7 @@ export function renderCvHtml(view: CvView, photoDataUri: string | null): string 
   const b = view.basics;
   const links = [
     b.links.linkedin ? link(b.links.linkedin) : null,
-    link(b.links.github),
+    b.links.github ? link(b.links.github) : null,
     b.links.portfolio ? link(b.links.portfolio, "Portfolio") : null,
   ].filter((l): l is string => l !== null);
 

@@ -4,7 +4,7 @@ import { google } from "googleapis";
 import type { SearchConfig } from "../../config/searchConfig.js";
 import { db } from "../../db/client.js";
 import { gmailMessages } from "../../db/schema.js";
-import { loadGmailAuth } from "../gmail/auth.js";
+import { explainGmailError, loadGmailAuth } from "../gmail/auth.js";
 import { resolveJobUrl } from "../gmail/canonicalUrl.js";
 import { extractJobs } from "../gmail/extract.js";
 import { parseMessage } from "../gmail/message.js";
@@ -26,10 +26,11 @@ export function gmailSource(config: SearchConfig): JobSource {
       const { query, lookbackDays, maxMessages } = config.sources.gmail;
       const gmail = google.gmail({ version: "v1", auth: await loadGmailAuth() });
 
-      const list = await gmail.users.messages.list(
-        { userId: "me", q: `${query} newer_than:${lookbackDays}d`, maxResults: maxMessages },
-        { signal },
-      );
+      const list = await gmail.users.messages
+        .list({ userId: "me", q: `${query} newer_than:${lookbackDays}d`, maxResults: maxMessages }, { signal })
+        .catch((err: unknown) => {
+          throw explainGmailError(err);
+        });
       const ids = (list.data.messages ?? []).map((m) => m.id).filter((id): id is string => typeof id === "string");
       if (ids.length === 0) return [];
 

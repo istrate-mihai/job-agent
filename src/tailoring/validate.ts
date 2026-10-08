@@ -147,3 +147,30 @@ export function validateSummaryStyle(summary: string, seeds: readonly string[], 
   }
   return problems;
 }
+
+// Cover letters: written by the candidate, about the candidate, selling — never auditing themselves.
+// Third person ("the candidate designed…") reads as machine output; a recruiter stops at the first sentence.
+const THIRD_PERSON_RE = /\b(the candidate|the applicant|this candidate|the developer has|candidatul|candidata)\b/i;
+// Volunteering unmet requirements in writing hands the reviewer a reason to reject; gaps belong in diff.md for interview prep
+const GAP_CONFESSION_RE =
+  /\b(not present in (the|my) (cv|resume)|(which|that) i (do not|don't|lack)|i (do not|don't) (yet )?(have|meet|hold|possess)|i (lack|am missing)|although i (do not|don't|lack|have not|haven't)|while i (do not|don't|lack|have not|haven't)|(does|do) not (meet|match) (the|your|all)|falls? short|not (yet )?(have|hold) (a|the|any) (degree|bachelor)|nu (am|detin|indeplinesc))\b/i;
+const CLICHE_RE = /\b(i am (excited|thrilled|passionate|proud)|perfect (match|fit)|dream (job|role)|hit the ground running|team player|go-getter|think outside the box|synergy)\b/i;
+const FIRST_PERSON_LETTER_RE = /\b(i|i'm|i've|my|me|eu|am|mea|meu)\b/i;
+
+/** Style checks for the cover letter: voice, no self-sabotage, no clichés. Returns problems prefixed "cover letter". */
+export function validateLetterStyle(paragraphs: readonly string[]): string[] {
+  const problems: string[] = [];
+  paragraphs.forEach((p, i) => {
+    const label = `cover letter ¶${i + 1}`;
+    const third = THIRD_PERSON_RE.exec(p)?.[0];
+    if (third) problems.push(`${label}: written in third person ("${third}"); write as the candidate, in first person`);
+    const gap = GAP_CONFESSION_RE.exec(p)?.[0];
+    if (gap) problems.push(`${label}: admits an unmet requirement ("${gap}"); never mention gaps in the letter, lead with what is evidenced`);
+    const cliche = CLICHE_RE.exec(p)?.[0];
+    if (cliche) problems.push(`${label}: cliché ("${cliche}"); be specific instead`);
+  });
+  if (paragraphs.length > 0 && !paragraphs.some((p) => FIRST_PERSON_LETTER_RE.test(p))) {
+    problems.push("cover letter: never uses first person; the letter must sound like the candidate wrote it");
+  }
+  return problems;
+}

@@ -135,3 +135,17 @@ Add a job found outside the pipeline (recruiter email, Facebook group, poster, r
   → scored immediately; then npm run decide -- <id> approve && npm run tailor -- <id>
   Already applied without the agent (no description needed):
   npm run add -- "Accenture" "Full Stack Developer" --applied "Accenture careers" && npm run track -- <id> rejected "note"
+
+Reach a human, not just the ATS (after tailoring, before or right after applying):
+  npm run outreach                                   → who has no recruiter contacted yet
+  npm run outreach -- <id> --role recruiter          → open the printed LinkedIn search link, pick the recruiter
+  npm run outreach -- <id> --role recruiter --to "Ana Pop" --email ana@firma.ro   → re-draft with the name (+ Gmail draft)
+  send the connection note on LinkedIn, then: npm run outreach -- sent <id> connect
+  when they reply: npm run outreach -- replied <id>
+Follow-ups (daily, 1 minute):  npm run followup   → send the texts →  npm run followup -- <id> sent
+Weekly:  npm run stats   → put effort where replies come from
+After updating (once):  npm run db:migrate   (creates the outreach table)   ·   npm run gmail:auth (only for --email drafts)
+
+GUI (instead of typing the commands above):
+  cd ~/projects/job-agent && npm run ui      → browser opens http://localhost:5174 (Ctrl+C in the terminal to stop)
+  Review keys: J/K move · A approve · S skip · Shift+A/S with reason · O open posting · 1-7 switch views · Esc close panel

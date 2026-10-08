@@ -2,6 +2,7 @@
 import type { SearchConfig } from "../config/searchConfig.js";
 import { hasTerm, normalizeText } from "../ingest/text.js";
 import type { NormalizedPosting } from "../ingest/types.js";
+import { checkEligibility, requiredYears } from "./eligibility.js";
 
 export type LocationTier = "remote" | "tierA" | "tierB";
 
@@ -116,6 +117,13 @@ export function hardFilter(p: NormalizedPosting, cfg: SearchConfig, now: Date = 
   flags.push(...location.flags);
 
   flags.push(...languageFlags(p.description, cfg.languageFlags));
+
+  // Postings restricted to US/Canada/UK residents are never applicable from Romania, whatever the fit score
+  const eligibility = checkEligibility(p.description);
+  if (eligibility.blocked !== null) reasons.push(`eligibility-excluded:${eligibility.blocked}`);
+  flags.push(...eligibility.flags);
+  const years = requiredYears(p.description);
+  if (years !== null) flags.push(`years-required:${years}`);
 
   return { pass: reasons.length === 0, tier: location.tier, reasons, flags };
 }

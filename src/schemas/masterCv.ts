@@ -51,7 +51,7 @@ export const MasterCvSchema = z.object({
     phone: z.string(),
     location: z.string(),
     links: z.object({
-      github: z.url(),
+      github: z.url().optional(),
       linkedin: z.url().optional(),
       portfolio: z.url().optional(),
     }),

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Agent</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E4FA8'/%3E%3Cpath d='M6 22h20M10 22V12M16 22V8M22 22v-6' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app no-detail">
+  <nav class="rail" aria-label="Sections">
+    <div class="brand">Job Agent</div>
+    <button class="primary run-daily" data-run="daily" title="Start DB, check Gmail, ingest, enrich, score">Run daily pipeline</button>
+    <ul class="nav">
+      <li><a href="#review" data-view="review">Review <span class="count" data-count="toReview"></span></a></li>
+      <li><a href="#apps" data-view="apps">Applications <span class="count" data-count="active"></span></a></li>
+      <li><a href="#outreach" data-view="outreach">Outreach</a></li>
+      <li><a href="#followups" data-view="followups">Follow-ups <span class="count due" data-count="followUpsDue"></span></a></li>
+      <li><a href="#stats" data-view="stats">Stats</a></li>
+      <li><a href="#add" data-view="add">Add a job</a></li>
+      <li><a href="#runs" data-view="runs">Run history</a></li>
+      <li><a href="#setup" data-view="setup">Setup <span class="count due" data-count="setupIssues"></span></a></li>
+    </ul>
+    <div class="rail-tools">
+      <p class="rail-heading">Single steps</p>
+      <button data-run="db-up">Start database</button>
+      <button data-run="gmail-check">Check Gmail</button>
+      <button data-run="pipeline">Ingest + score</button>
+      <button data-run="tailor">Tailor all approved</button>
+      <button data-run="refilter">Re-apply filters</button>
+      <button data-run="cv-base">Render base CV</button>
+    </div>
+    <div class="tokens" id="tokens"></div>
+  </nav>
+
+  <main class="main" id="main" tabindex="-1"></main>
+
+  <aside class="detail" id="detail" aria-label="Details" hidden></aside>
+</div>
+
+<section class="console" id="console" aria-label="Command output">
+  <button class="console-bar" id="console-toggle" aria-expanded="false">
+    <span class="dot" id="console-dot"></span>
+    <span id="console-title">No command running</span>
+    <span class="console-hint">Output</span>
+  </button>
+  <pre class="console-log" id="console-log"></pre>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="prompt-dialog">
+  <form method="dialog" id="prompt-form">
+    <h3 id="prompt-title"></h3>
+    <div id="prompt-fields"></div>
+    <div class="dialog-actions">
+      <button value="cancel" type="submit" class="ghost">Cancel</button>
+      <button value="ok" type="submit" class="primary" id="prompt-ok">OK</button>
+    </div>
+  </form>
+</dialog>
+<script src="/app.js" type="module"></script>
+</body>
+</html>

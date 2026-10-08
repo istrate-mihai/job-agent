@@ -162,3 +162,31 @@ export const statusEvents = pgTable(
   },
   (t) => [index("status_events_posting_id_idx").on(t.postingId)],
 );
+
+// Recruiter / hiring-manager outreach and follow-ups. Messages are drafted here and sent by YOU (never automatically):
+// "drafted" → you copy/send it → `npm run outreach -- sent <id>` → "sent" → "replied" when they answer.
+export const outreachKind = pgEnum("outreach_kind", ["connect", "message", "email", "followup"]);
+export const outreachStatus = pgEnum("outreach_status", ["drafted", "sent", "replied"]);
+
+export const outreach = pgTable(
+  "outreach",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postingId: uuid("posting_id")
+      .notNull()
+      .references(() => postings.id, { onDelete: "cascade" }),
+    kind: outreachKind("kind").notNull(),
+    status: outreachStatus("status").notNull().default("drafted"),
+    recipientName: text("recipient_name"),
+    recipientRole: varchar("recipient_role", { length: 32 }),
+    recipientEmail: text("recipient_email"),
+    subject: text("subject"),
+    body: text("body").notNull(),
+    gmailDraftId: varchar("gmail_draft_id", { length: 64 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+  },
+  (t) => [index("outreach_posting_id_idx").on(t.postingId)],
+);
+
+export type OutreachRow = typeof outreach.$inferSelect;

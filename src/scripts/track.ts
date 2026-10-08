@@ -5,7 +5,7 @@
 import { and, eq, gte, inArray, ne, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
-import { postings, statusEvents, tailorings } from "../db/schema.js";
+import { outreach, postings, statusEvents, tailorings } from "../db/schema.js";
 import { normalizeText } from "../ingest/text.js";
 
 type Status = (typeof postings.$inferSelect)["status"];
@@ -30,6 +30,8 @@ async function board(): Promise<void> {
       status: postings.status,
       url: postings.url,
       outputDir: tailorings.outputDir,
+      lastTouch: sql<Date | null>`(select max(${outreach.sentAt}) from ${outreach} where ${outreach.postingId} = ${sql.raw(`"postings"."id"`)} and ${outreach.status} <> 'drafted')`,
+      contacted: sql<boolean>`exists (select 1 from ${outreach} where ${outreach.postingId} = ${sql.raw(`"postings"."id"`)} and ${outreach.kind} <> 'followup' and ${outreach.status} <> 'drafted')`,
       since: sql<Date>`(select max(${statusEvents.createdAt}) from ${statusEvents} where ${statusEvents.postingId} = ${postings.id} and ${statusEvents.toStatus} = ${postings.status})`,
     })
     .from(postings)
@@ -45,9 +47,12 @@ async function board(): Promise<void> {
   for (const r of rows) {
     const days = r.since ? Math.floor((now - new Date(r.since).getTime()) / DAY_MS) : null;
     const age = days === null ? "" : ` · ${days}d`;
-    const nudge = r.status === "applied" && days !== null && days >= FOLLOW_UP_DAYS ? "  ← follow up" : "";
+    const touchedDays = r.lastTouch ? Math.floor((now - new Date(r.lastTouch).getTime()) / DAY_MS) : null;
+    const quiet = days !== null && days >= FOLLOW_UP_DAYS && (touchedDays === null || touchedDays >= FOLLOW_UP_DAYS);
+    const nudge = r.status === "applied" && quiet ? "  ← follow up (npm run followup)" : "";
+    const person = (r.status === "applied" || r.status === "tailored") && !r.contacted ? "  · no recruiter contacted" : "";
     const next = r.status === "approved" ? "  ← npm run tailor" : r.status === "tailored" ? "  ← review + apply" : "";
-    console.log(`${r.status.padEnd(10)} [${r.id.slice(0, 8)}] ${r.company} — ${r.title}${age}${nudge}${next}`);
+    console.log(`${r.status.padEnd(10)} [${r.id.slice(0, 8)}] ${r.company} — ${r.title}${age}${nudge}${next}${person}`);
     if (r.status === "tailored" && r.outputDir) console.log(`           ${r.outputDir}`);
   }
 }

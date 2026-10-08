@@ -7,7 +7,7 @@ import type { PostingRow, PostingScoreRow, TailoringSelection } from "../db/sche
 import { hasTerm, normalizeText } from "../ingest/text.js";
 import { generateStructured } from "../llm/router.js";
 import { RoleTag, type MasterCv } from "../schemas/masterCv.js";
-import { buildEvidenceIndex, validateClaims, validateSummaryStyle, type TextRules } from "./validate.js";
+import { buildEvidenceIndex, validateClaims, validateLetterStyle, validateSummaryStyle, type TextRules } from "./validate.js";
 
 const SUMMARY_RULES: TextRules = { maxChars: 650, maxSentences: 4 };
 const LETTER_PARAGRAPH_RULES: TextRules = { maxChars: 1100, maxSentences: 6 };
@@ -88,7 +88,9 @@ Summary rules (English, 2-3 sentences, 45-75 words, no "I"/"my", no self-praise 
 Cover letter rules (${lang}, first person, 3-4 paragraphs, 220-350 words in total, plain text, no greeting, no sign-off, no markdown):
 - coverLetter[0] opening (2-3 sentences): the exact role title and company, and why this role. ${why}
 - coverLetter[1] evidence (3-5 sentences): map the posting's top 3 requirements to the candidate's strongest bullets. Name the employer or project ("At Web Software Development SRL…", "On my Recipe Sharing Platform…") and keep the numbers exactly as in the bullets.
-- coverLetter[2] (optional, 2-3 sentences): if the posting has hard requirements the candidate does not meet (years, degree, key technology), acknowledge them briefly and honestly, then state what the candidate brings instead. Training-only skills may appear only as ongoing training ("I am completing a DevOps program that covers…").
+- coverLetter[2] (optional, 2-3 sentences): one more strength that matters for this role (a second project, the industrial/quality background when the role touches manufacturing, automotive or IoT, or immediate availability). Training-only skills may appear only as ongoing training ("I am completing a DevOps program that covers…").
+- NEVER mention requirements the candidate does not meet (missing years, degree, technologies, industry). Gaps are handled in the interview, not volunteered in writing.
+- Write as the candidate, in first person ("I built…", "At Web Software Development SRL I…"). Never "the candidate", "the applicant" or the candidate's name.
 - last paragraph (1-2 sentences): ${availability ? `state the availability as a full sentence ("${availability.replace(/^Available for relocation to /, "I am available to relocate to ").replace(/^Available for remote work from /, "I am available to work remotely from ")}") and` : ""} invite a conversation.
 - Every sentence has a subject. No clichés ("I am excited", "I am proud", "perfectly"). Specific and factual, not generic.
 - Never add technologies, employers, numbers or years that are not in the catalog; you may quote the posting's own numbers only when stating a gap.
@@ -219,7 +221,10 @@ function fallbackLetter(posting: PostingRow, cv: MasterCv, selection: TailoringS
 }
 
 function validateLetter(paragraphs: string[], index: ReturnType<typeof buildEvidenceIndex>, context: Parameters<typeof validateClaims>[4]): string[] {
-  const problems = paragraphs.flatMap((p, i) => validateClaims(`cover letter ¶${i + 1}`, p, index, LETTER_PARAGRAPH_RULES, context));
+  const problems = [
+    ...paragraphs.flatMap((p, i) => validateClaims(`cover letter ¶${i + 1}`, p, index, LETTER_PARAGRAPH_RULES, context)),
+    ...validateLetterStyle(paragraphs),
+  ];
   const words = paragraphs.join(" ").split(/\s+/).filter(Boolean).length;
   if (words > LETTER_MAX_WORDS) problems.push(`cover letter: ${words} words (max ${LETTER_MAX_WORDS})`);
   return problems;

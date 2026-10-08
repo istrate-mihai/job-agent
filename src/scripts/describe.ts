@@ -70,6 +70,10 @@ async function main(): Promise<number> {
   console.log(`Matched: ${s.matchedSkills.join(", ") || "—"}`);
   console.log(`Gaps: ${s.mustHaveGaps.join(", ") || "none"}`);
   if (s.components.penalties.length > 0) console.log(`Penalty: ${s.components.penalties.join("; ")}`);
+  const blocked = filter.reasons.find((r) => r.startsWith("eligibility-excluded:"));
+  if (blocked) console.log(`⛔ Not eligible: "${blocked.slice("eligibility-excluded:".length)}". Skip it: npm run decide -- ${idPrefix} skip "not eligible from Romania"`);
+  const softEligibility = filter.flags.filter((f) => f.startsWith("eligibility-check:"));
+  if (softEligibility.length > 0) console.log(`⚠ Check eligibility: ${softEligibility.map((f) => f.slice("eligibility-check:".length)).join("; ")}`);
   console.log(
     posting.status === "approved"
       ? `Still approved. If the gaps change your mind: npm run decide -- ${idPrefix} skip "reason"; otherwise: npm run tailor -- ${idPrefix}`

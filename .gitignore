@@ -4,3 +4,7 @@ data/
 secrets/
 output/
 *.bak
+.pgdata/
+.pgdata.log
+.pgpw-*
+jobs/

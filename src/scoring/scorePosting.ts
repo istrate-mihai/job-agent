@@ -41,6 +41,7 @@ Always respond by calling record_score (or with the JSON object, if asked for JS
 const CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2", "native"] as const;
 const REQUIRED_LANGUAGE_CAP = 40; // a mandatory language you don't speak at B2+ makes the role unrealistic
 const TITLE_ONLY_CHARS = 300;
+const YEARS_SOFT_PENALTY = 8;
 
 export interface ScoreResult {
   total: number;
@@ -125,6 +126,20 @@ export async function scorePosting(
       components.penalties.push(`required ${language} → capped at ${REQUIRED_LANGUAGE_CAP}`);
       if (!gaps.some((g) => g.toLowerCase().includes(language))) gaps.push(`${language} (required)`);
     }
+  }
+
+  const yearsFlag = posting.flags.find((f) => f.startsWith("years-required:"));
+  const years = yearsFlag ? Number(yearsFlag.slice("years-required:".length)) : null;
+  if (years !== null && years >= config.seniority.yearsHardLimit) {
+    const cap = Math.max(0, config.scoring.reviewThreshold - 1);
+    if (total > cap) {
+      total = cap;
+      components.penalties.push(`asks for ${years}+ years → capped at ${cap}`);
+    }
+    if (!gaps.some((g) => /\byears?\b/i.test(g))) gaps.push(`${years}+ years experience`);
+  } else if (years !== null && years >= config.seniority.yearsSoftLimit) {
+    total = Math.max(0, total - YEARS_SOFT_PENALTY);
+    components.penalties.push(`asks for ${years}+ years → -${YEARS_SOFT_PENALTY}`);
   }
 
   const recommendation =

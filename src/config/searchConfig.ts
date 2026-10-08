@@ -127,6 +127,9 @@ export const SearchConfigSchema = z.object({
     target: z.string().min(1),
     allow: TermList.min(1),
     belowLevel: z.enum(["accept", "penalize"]).default("accept"), // accept: junior/lower-paid roles score like level matches
+    // Deterministic seniority guard (years parsed from the description): the LLM tends to over-credit 6+/8+ year roles
+    yearsSoftLimit: z.number().int().min(1).max(15).default(5), // asks for exactly this many years → small penalty
+    yearsHardLimit: z.number().int().min(1).max(15).default(6), // asks for this many or more → capped below the review threshold
   }),
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
