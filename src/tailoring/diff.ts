@@ -37,6 +37,15 @@ const SYNONYMS: ReadonlyArray<[RegExp, readonly string[]]> = [
 
 const short = (text: string, max = 90): string => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 
+// Highest "N years" / "N+ years" in the software seeds. The industrial seed counts CNC/quality years,
+// which must not be reported as software experience against a posting's "N+ years" requirement.
+export function softwareYearsClaimed(seeds: MasterCv["summarySeeds"]): number {
+  const years = Object.entries(seeds)
+    .filter(([role]) => role !== "industrial")
+    .flatMap(([, seed]) => [...seed.matchAll(/(\d+)\+?\s*years/gi)].map((m) => Number(m[1])));
+  return Math.max(0, ...years);
+}
+
 export function renderDiff(d: DiffInput): string {
   const facts = new Map<string, Fact>(
     [...d.cv.experience.flatMap((e) => e.facts), ...d.cv.projects.flatMap((p) => p.facts)].map((f) => [f.id, f]),
@@ -57,8 +66,8 @@ export function renderDiff(d: DiffInput): string {
     const words = stems(k);
     return words.length > 0 && !/\d/.test(k) && words.every((w) => evidenceStems.has(w));
   };
-  // Years the CV itself claims ("4+ years of software development") vs the posting's "3+ years"
-  const cvYears = Math.max(0, ...Object.values(d.cv.summarySeeds).flatMap((seed) => [...seed.matchAll(/(\d+)\+?\s*years/gi)].map((m) => Number(m[1]))));
+  // Years the CV itself claims ("3 years of professional full-stack development") vs the posting's "3+ years"
+  const cvYears = softwareYearsClaimed(d.cv.summarySeeds);
 
   const coverage = d.postingKeywords.map((k) => {
     const years = /(\d+)\s*(?:\+|-\s*\d+)?\s*(?:\+\s*)?years?/i.exec(k);
