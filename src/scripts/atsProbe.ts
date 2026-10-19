@@ -6,6 +6,7 @@
 // Read-only: no DB, no LLM.
 import { setTimeout as sleep } from "node:timers/promises";
 import { z } from "zod";
+import { ashbySource } from "../ingest/sources/ashby.js";
 import { greenhouseSource } from "../ingest/sources/greenhouse.js";
 import { leverSource } from "../ingest/sources/lever.js";
 import { personioSource } from "../ingest/sources/personio.js";
@@ -14,7 +15,7 @@ import { workableSource } from "../ingest/sources/workable.js";
 import { normalizeText } from "../ingest/text.js";
 import type { JobSource } from "../ingest/types.js";
 
-type Ats = "smartrecruiters" | "greenhouse" | "lever" | "lever-eu" | "workable" | "recruitee" | "personio-de" | "personio-com";
+type Ats = "smartrecruiters" | "greenhouse" | "lever" | "lever-eu" | "ashby" | "workable" | "recruitee" | "personio-de" | "personio-com";
 interface Candidate {
   ats: Ats;
   slug: string;
@@ -37,6 +38,7 @@ const SUPPORTED: readonly { ats: Ats; re: RegExp }[] = [
   { ats: "greenhouse", re: /(?:boards|job-boards(?:\.eu)?)\.greenhouse\.io\/(?:embed\/job_board\?for=)?([A-Za-z0-9_-]+)/g },
   { ats: "lever-eu", re: /jobs\.eu\.lever\.co\/([A-Za-z0-9_-]+)/g },
   { ats: "lever", re: /jobs\.lever\.co\/([A-Za-z0-9_-]+)/g },
+  { ats: "ashby", re: /jobs\.ashbyhq\.com\/([A-Za-z0-9_.-]+)/g },
   { ats: "workable", re: /apply\.workable\.com\/([A-Za-z0-9_-]+)/g },
   { ats: "recruitee", re: /([a-z0-9-]+)\.recruitee\.com/g },
   { ats: "personio-de", re: /([a-z0-9-]+)\.jobs\.personio\.de/g },
@@ -74,6 +76,8 @@ function sourceFor(c: Candidate, company: string): JobSource | null {
       return leverSource(company, c.slug, "global");
     case "lever-eu":
       return leverSource(company, c.slug, "eu");
+    case "ashby":
+      return ashbySource(company, c.slug);
     case "workable":
       return workableSource(company, c.slug);
     case "recruitee":
@@ -133,6 +137,8 @@ function yamlLine(h: Hit, company: string): string {
     case "lever":
     case "lever-eu":
       return `lever:           - { company: ${company}, slug: ${h.slug}${h.ats === "lever-eu" ? ", region: eu" : ""} }`;
+    case "ashby":
+      return `ashby:           - { company: ${company}, slug: ${h.slug} }`;
     case "workable":
       return `workable:        - { company: ${company}, slug: ${h.slug} }`;
     case "recruitee":
@@ -160,7 +166,7 @@ async function main(): Promise<number> {
       if (found.unsupported.length > 0) console.log(`  uses ${found.unsupported.join(", ")} (no feed source; rely on LinkedIn/eJobs email alerts)`);
       if (candidates.length === 0) console.log("  no supported ATS link on the page (JS-rendered page? try the company name instead)");
     } else {
-      const allAts: Ats[] = ["smartrecruiters", "greenhouse", "lever", "lever-eu", "workable", "recruitee", "personio-de", "personio-com"];
+      const allAts: Ats[] = ["smartrecruiters", "greenhouse", "lever", "lever-eu", "ashby", "workable", "recruitee", "personio-de", "personio-com"];
       candidates = slugGuesses(arg).flatMap((slug) => allAts.map((ats) => ({ ats, slug })));
     }
     let hits = 0;

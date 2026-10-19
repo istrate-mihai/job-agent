@@ -93,6 +93,16 @@ export const SearchConfigSchema = z.object({
         }),
       )
       .default([]),
+    // Slug from a careers link: jobs.ashbyhq.com/<slug>
+    ashby: z.array(z.object({ company: z.string().min(1), slug: z.string().min(1) })).default([]),
+    // Arbeitnow public API (EU, mostly Germany), see src/ingest/sources/arbeitnow.ts
+    arbeitnow: z
+      .object({
+        enabled: z.boolean(),
+        remoteOnly: z.boolean().default(true),
+        pages: z.number().int().min(1).max(3).default(1), // ⚡ Perf/politeness: 300 postings per page
+      })
+      .default({ enabled: false, remoteOnly: true, pages: 1 }),
     // Slug from a careers link: apply.workable.com/<slug>/
     workable: z.array(z.object({ company: z.string().min(1), slug: z.string().min(1) })).default([]),
     // Slug from a careers link: <slug>.recruitee.com
@@ -142,7 +152,7 @@ export const SearchConfigSchema = z.object({
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
   // JoburiIT's API lists only published (active) vacancies, so it behaves like a careers page here
-  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "workable", "recruitee", "personio", "joburiit"]),
+  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "ashby", "workable", "recruitee", "personio", "joburiit"]),
   stackWeights: z.record(z.string(), z.number().min(0).max(1)),
   languageFlags: TermList,
   companies: z.object({ allowlist: TermList, blocklist: TermList }),
