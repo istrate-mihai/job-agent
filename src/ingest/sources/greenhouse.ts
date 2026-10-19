@@ -19,6 +19,7 @@ const GreenhouseResponseSchema = z.object({ jobs: z.array(GreenhouseJobSchema) }
 export function greenhouseSource(company: string, boardToken: string): JobSource {
   return {
     name: `greenhouse:${boardToken}`,
+    timeoutMs: 90_000, // ⚡ Perf: content=true returns full HTML for every job; big boards (Elastic, Stripe) exceed 30s
     async fetch(signal): Promise<NormalizedPosting[]> {
       const url = `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(boardToken)}/jobs?content=true`;
       const { jobs } = GreenhouseResponseSchema.parse(await fetchJson(url, signal));

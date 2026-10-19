@@ -78,7 +78,7 @@ sources:
     # Added more senders for global and local platforms
     query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com OR glassdoor.com OR wellfound.com OR joburiit.ro OR devjob.ro OR hipo.ro OR jobradar24.ro OR talent.com OR juniors.ro OR undelucram.ro) -from:noutati-companii@mta.ejobs.ro"
     lookbackDays: 7
-    maxMessages: 50
+    maxMessages: 100 # ~30 alert emails/day across platforms; 50 was dropping some
   remotive:
     enabled: true
     categories: [software-dev]
