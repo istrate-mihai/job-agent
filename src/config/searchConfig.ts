@@ -66,6 +66,14 @@ export const SearchConfigSchema = z.object({
         count: z.number().int().min(1).max(200).default(100),
       })
       .default({ enabled: false, geos: ["romania"], count: 100 }),
+    // JoburiIT.ro via its public WordPress REST API, see src/ingest/sources/joburiit.ts
+    joburiit: z
+      .object({
+        enabled: z.boolean(),
+        categories: TermList.default([]), // vacancy-category slugs (e.g. joburi-backend, full-stack); [] = all
+        maxNewPerRun: z.number().int().min(1).max(100).default(40), // ⚡ Perf/politeness: posting pages fetched per run
+      })
+      .default({ enabled: false, categories: [], maxNewPerRun: 40 }),
     smartrecruiters: z
       .array(
         z.object({
@@ -133,7 +141,8 @@ export const SearchConfigSchema = z.object({
   }),
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag
-  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "workable", "recruitee", "personio"]),
+  // JoburiIT's API lists only published (active) vacancies, so it behaves like a careers page here
+  ageExemptSources: TermList.default(["smartrecruiters", "greenhouse", "lever", "workable", "recruitee", "personio", "joburiit"]),
   stackWeights: z.record(z.string(), z.number().min(0).max(1)),
   languageFlags: TermList,
   companies: z.object({ allowlist: TermList, blocklist: TermList }),

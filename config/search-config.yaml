@@ -57,6 +57,10 @@ sources:
   jobicy: # remote jobs open to Romania/Europe (keep the Jobicy link when applying)
     enabled: true
     geos: [romania, europe]
+  joburiit: # JoburiIT.ro (IT-only, RO) via its public WordPress API — no LLM tokens; replaces the old JS-rendered board entry
+    enabled: true
+    categories: [] # [] = all; or slugs: joburi-backend, full-stack, frontend, devops, cloud, engineering, wordpress, mobile
+    maxNewPerRun: 40
   smartrecruiters: # companyId from careers.smartrecruiters.com/<companyId>
     - { company: Endava, companyId: Endava, country: ro }
   gmail:
@@ -108,13 +112,6 @@ sources:
         - https://devjob.ro/jobs/all/Brasov
         - https://devjob.ro/jobs/all/Bucuresti
       linkPattern: "^https://(www\\.)?devjob\\.ro/jobs/[^/]+-[^/]+"
-      extract: auto
-    - name: joburiit
-      urls:
-        - https://joburiit.ro/jobs/
-        - https://joburiit.ro/jobs/page/2/
-        - https://joburiit.ro/jobs/page/3/
-      linkPattern: "^https://joburiit\\.ro/job/"
       extract: auto
     - name: jobradar24
       urls:
