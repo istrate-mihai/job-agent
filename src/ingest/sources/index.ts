@@ -1,6 +1,8 @@
 // src/ingest/sources/index.ts
 import type { SearchConfig } from "../../config/searchConfig.js";
 import type { JobSource } from "../types.js";
+import { arbeitnowSource } from "./arbeitnow.js";
+import { ashbySource } from "./ashby.js";
 import { gmailSource } from "./gmail.js";
 import { greenhouseSource } from "./greenhouse.js";
 import { jobicySource } from "./jobicy.js";
@@ -15,15 +17,18 @@ import { webBoardSource } from "./webBoard.js";
 import { workableSource } from "./workable.js";
 
 export function buildSources(config: SearchConfig): JobSource[] {
-  const { gmail, remotive, jobicy, joburiit, smartrecruiters, greenhouse, lever, workable, recruitee, personio, rss, boards } = config.sources;
+  const { gmail, remotive, jobicy, joburiit, arbeitnow, smartrecruiters, greenhouse, lever, ashby, workable, recruitee, personio, rss, boards } =
+    config.sources;
   return [
     ...(gmail.enabled ? [gmailSource(config)] : []),
     ...(remotive.enabled ? [remotiveSource(remotive.categories)] : []),
     ...(jobicy.enabled ? [jobicySource(jobicy.geos, jobicy.count)] : []),
     ...(joburiit.enabled ? [joburiItSource(joburiit)] : []),
+    ...(arbeitnow.enabled ? [arbeitnowSource(arbeitnow)] : []),
     ...smartrecruiters.map((s) => smartRecruitersSource(s.company, s.companyId, s.country, config.titles)),
     ...greenhouse.map((g) => greenhouseSource(g.company, g.boardToken)),
     ...lever.map((l) => leverSource(l.company, l.slug, l.region)),
+    ...ashby.map((a) => ashbySource(a.company, a.slug)),
     ...workable.map((w) => workableSource(w.company, w.slug)),
     ...recruitee.map((r) => recruiteeSource(r.company, r.slug)),
     ...personio.map((p) => personioSource(p.company, p.slug, p.domain)),
