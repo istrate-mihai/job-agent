@@ -44,7 +44,7 @@ flowchart LR
 
 | Step | What happens | LLM? |
 |---|---|---|
-| **Ingest** | Pulls postings from Gmail alert emails (LLM extracts jobs from the email), Remotive, Jobicy and SmartRecruiters. Normalizes them and deduplicates across sources. | extraction only |
+| **Ingest** | Pulls postings from Gmail alert emails (LLM extracts jobs from the email), Remotive, Jobicy, JoburiIT (WordPress API) and SmartRecruiters. Normalizes them and deduplicates across sources. | extraction only |
 | **Hard filter** | Title include/exclude lists, target cities (home city, remote, relocation cities), posting age, blocklisted companies, required languages (English + Romanian wording), "US/Canada residents only" style restrictions, and required years of experience parsed from the text. Free and deterministic. | no |
 | **Enrich** | Job-alert emails contain only a title. This step fetches the full description (schema.org `JobPosting` JSON-LD or the page's description block), detects closed or expired postings, and queues re-scoring. | no |
 | **Score** | The LLM rates must-have coverage, stack overlap, seniority fit and goal alignment. **The total is computed in code**, plus deterministic location points and penalties (e.g. a required language the candidate doesn't speak caps the score). | yes |
@@ -114,7 +114,7 @@ Contact details (name, email, phone, links) are never sent to LLM providers; the
 config/search-config.yaml   what to search: sources, titles, locations, LLM routes, thresholds
 data/master-cv.json         the fact bank (gitignored) — the only source of CV content
 src/
-  ingest/        sources (gmail, remotive, jobicy, smartrecruiters, greenhouse, lever, workable, recruitee, personio, RSS feeds, job-board pages), enrichment
+  ingest/        sources (gmail, remotive, jobicy, joburiit, smartrecruiters, greenhouse, lever, workable, recruitee, personio, RSS feeds, job-board pages), enrichment
   filter/        deterministic hard filter
   llm/           provider router, OpenAI-compatible + Anthropic adapters, usage logging
   scoring/       LLM fit scoring (total computed in code)
