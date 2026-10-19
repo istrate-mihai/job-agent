@@ -61,25 +61,45 @@ sources:
     enabled: true
     categories: [] # [] = all; or slugs: joburi-backend, full-stack, frontend, devops, cloud, engineering, wordpress, mobile
     maxNewPerRun: 40
+  arbeitnow: # EU job board API (mostly Germany); remote-only, the location filter keeps EU/Romania scopes
+    enabled: true
+    remoteOnly: true
+    pages: 1
+  # Employer ATS feeds: postings land here hours/days before LinkedIn or job boards repost them.
+  # Every entry below was probed on 2026-10-19 (open roles in Romania in brackets). Re-check with: npm run ats:probe -- "<Company>"
   smartrecruiters: # companyId from careers.smartrecruiters.com/<companyId>
-    - { company: Endava, companyId: Endava, country: ro }
+    - { company: Endava, companyId: Endava, country: ro } # 64 RO
+    - { company: Bosch, companyId: BoschGroup, country: ro } # 81 RO (Cluj, Timișoara)
+    - { company: Continental, companyId: Continental, country: ro } # 40 RO (Timișoara, Iași, Sibiu, Brașov)
+    - { company: Accesa, companyId: Accesa, country: ro } # 30 RO (Cluj, remote RO)
+    - { company: Ubisoft, companyId: Ubisoft2, country: ro } # 8 RO (Bucharest, Craiova)
   gmail:
     enabled: true
     # Added more senders for global and local platforms
-    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com OR glassdoor.com OR wellfound.com OR joburiit.ro OR devjob.ro OR hipo.ro OR jobradar24.ro OR talent.com OR juniors.ro) -from:noutati-companii@mta.ejobs.ro"
+    query: "from:(jobalerts-noreply@linkedin.com OR ejobs.ro OR bestjobs.eu OR teamtailor-mail.com OR indeed.com OR glassdoor.com OR wellfound.com OR joburiit.ro OR devjob.ro OR hipo.ro OR jobradar24.ro OR talent.com OR juniors.ro OR undelucram.ro) -from:noutati-companii@mta.ejobs.ro"
     lookbackDays: 7
     maxMessages: 50
   remotive:
     enabled: true
     categories: [software-dev]
   # Board token from a careers link: boards.greenhouse.io/<token> or job-boards.greenhouse.io/<token>
-  greenhouse: []
+  greenhouse:
+    - { company: Elastic, boardToken: elastic } # 11 RO + distributed EMEA
+    - { company: Stripe, boardToken: stripe } # 7 RO (Bucharest)
+    - { company: MongoDB, boardToken: mongodb } # 5 RO
+    - { company: Thoughtworks, boardToken: thoughtworks } # 5 RO
   # Slug from a careers link: jobs.lever.co/<slug> (jobs.eu.lever.co/<slug> → region: eu)
-  lever: []
+  lever:
+    - { company: Caseware, slug: caseware } # 4 RO (Bucharest)
   # Find an employer's feed with: npm run ats:probe -- <careers-page-url | "Company Name">
   # and paste the printed line here. A wrong slug fails that source every run, so only add probed ones.
   # Not covered by feeds (no public API): Siemens (Avature), NTT DATA (Phenom), Workday/SuccessFactors
   # employers → keep LinkedIn/eJobs alerts for them in Gmail.
+  # Slug from a careers link: jobs.ashbyhq.com/<slug>
+  ashby:
+    - { company: UiPath, slug: uipath } # 23 RO (Bucharest) — AI/automation, fits the LLM-agents goal
+    - { company: Ramp, slug: ramp } # 24 RO (Bucharest engineering hub)
+    - { company: n8n, slug: n8n } # 7 RO, remote-first; workflow automation + AI agents
   workable: [] # slug from apply.workable.com/<slug>/
   recruitee: [] # slug from <slug>.recruitee.com
   personio: [] # slug from <slug>.jobs.personio.de (domain: com for .jobs.personio.com)
@@ -160,7 +180,8 @@ locations:
     - { name: Oradea, aliases: [] }
 
 titles:
-  include: [full stack, fullstack, full-stack, web developer, software engineer, software developer, backend, back-end, frontend, front-end, php developer, laravel, node.js, nodejs, vue, react, programator, dezvoltator, inginer software]
+  include: [full stack, fullstack, full-stack, web developer, software engineer, software developer, backend, back-end, frontend, front-end, php developer, laravel, node.js, nodejs, vue, react, programator, dezvoltator, inginer software,
+    devops, site reliability, sre, platform engineer, cloud engineer, ai engineer, llm, generative ai, genai, machine learning engineer, ml engineer, sdet, qa automation, test automation, software developer in test]
   exclude: [principal, staff, architect, head of, director, intern, internship]
 
 seniority:
@@ -182,6 +203,9 @@ stackWeights:
   mongodb: 0.6
   docker: 0.5
   llm: 0.5
+  kubernetes: 0.4
+  playwright: 0.4
+  python: 0.4
 
 languageFlags: [german, french, dutch] # mandatory ones get flagged, not auto-rejected
 
@@ -198,7 +222,7 @@ scoring:
   reviewThreshold: 50 # >= this → "maybe", below → "skip"
   batchSize: 25 # postings scored per run (free tiers: keep modest)
   maxDescriptionChars: 6000 # ⚡ Perf: long postings are mostly boilerplate after this
-  careerGoals: "Full-stack roles from junior to mid level on PHP/Laravel, Node.js/TypeScript, Vue or React; growth toward DevOps and LLM/agentic systems."
+  careerGoals: "Full-stack roles from junior to mid level on PHP/Laravel, Node.js/TypeScript, Vue or React; also junior DevOps, AI/LLM engineering and SDET/QA automation roles; growth toward DevOps and LLM/agentic systems."
 
 digest:
   limit: 10 # postings shown per digest

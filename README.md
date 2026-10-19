@@ -19,15 +19,17 @@ The interesting engineering problem is **making LLM output trustworthy enough to
 ```mermaid
 flowchart LR
   subgraph Sources
-    G[Gmail job alerts<br/>LinkedIn · eJobs · BestJobs]
+    G[Gmail job alerts<br/>LinkedIn · Indeed · Glassdoor · eJobs · BestJobs]
     R[Remotive API]
     J[Jobicy API]
-    S[SmartRecruiters<br/>company careers pages]
+    S[Employer ATS feeds<br/>SmartRecruiters · Greenhouse · Lever · Ashby]
+    AN[Arbeitnow API]
   end
   G --> I[Ingest<br/>normalize · dedupe]
   R --> I
   J --> I
   S --> I
+  AN --> I
   I --> F[Hard filter<br/>no LLM: title · location · age · language]
   F --> E[Enrich<br/>fetch full description · drop closed jobs]
   E --> SC[LLM scoring<br/>0–100 vs master CV]
@@ -44,7 +46,7 @@ flowchart LR
 
 | Step | What happens | LLM? |
 |---|---|---|
-| **Ingest** | Pulls postings from Gmail alert emails (LLM extracts jobs from the email), Remotive, Jobicy, JoburiIT (WordPress API) and SmartRecruiters. Normalizes them and deduplicates across sources. | extraction only |
+| **Ingest** | Pulls postings from Gmail alert emails (LLM extracts jobs from the email), Remotive, Jobicy, Arbeitnow, JoburiIT (WordPress API) and employer ATS feeds (SmartRecruiters, Greenhouse, Lever, Ashby, Workable, Recruitee, Personio) — ATS postings arrive before job boards repost them. Find an employer's feed with `npm run ats:probe -- "<Company>"`. Normalizes them and deduplicates across sources. | extraction only |
 | **Hard filter** | Title include/exclude lists, target cities (home city, remote, relocation cities), posting age, blocklisted companies, required languages (English + Romanian wording), "US/Canada residents only" style restrictions, and required years of experience parsed from the text. Free and deterministic. | no |
 | **Enrich** | Job-alert emails contain only a title. This step fetches the full description (schema.org `JobPosting` JSON-LD or the page's description block), detects closed or expired postings, and queues re-scoring. | no |
 | **Score** | The LLM rates must-have coverage, stack overlap, seniority fit and goal alignment. **The total is computed in code**, plus deterministic location points and penalties (e.g. a required language the candidate doesn't speak caps the score). | yes |
@@ -114,7 +116,7 @@ Contact details (name, email, phone, links) are never sent to LLM providers; the
 config/search-config.yaml   what to search: sources, titles, locations, LLM routes, thresholds
 data/master-cv.json         the fact bank (gitignored) — the only source of CV content
 src/
-  ingest/        sources (gmail, remotive, jobicy, joburiit, smartrecruiters, greenhouse, lever, workable, recruitee, personio, RSS feeds, job-board pages), enrichment
+  ingest/        sources (gmail, remotive, jobicy, arbeitnow, joburiit, smartrecruiters, greenhouse, lever, ashby, workable, recruitee, personio, RSS feeds, job-board pages), enrichment
   filter/        deterministic hard filter
   llm/           provider router, OpenAI-compatible + Anthropic adapters, usage logging
   scoring/       LLM fit scoring (total computed in code)

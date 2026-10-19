@@ -1,5 +1,7 @@
 // tests/atsSources.test.ts
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { arbeitnowSource } from "../src/ingest/sources/arbeitnow.js";
+import { ashbySource } from "../src/ingest/sources/ashby.js";
 import { parsePersonioXml, personioSource } from "../src/ingest/sources/personio.js";
 import { recruiteeSource } from "../src/ingest/sources/recruitee.js";
 import { workableSource } from "../src/ingest/sources/workable.js";
@@ -91,5 +93,65 @@ describe("recruitee", () => {
     const rows = await recruiteeSource("Acme", "acme").fetch(signal());
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ sourceId: "acme:1", workMode: "hybrid", description: "Vue 3\n\nTypeScript" });
+  });
+});
+
+describe("ashby", () => {
+  it("joins primary and secondary locations, maps workplace type and skips unlisted jobs", async () => {
+    stubJson({
+      apiVersion: "1",
+      jobs: [
+        {
+          id: "a1",
+          title: " Software Engineer ",
+          location: "Bucharest",
+          secondaryLocations: [{ location: "Cluj-Napoca" }, { location: "Bucharest" }],
+          isListed: true,
+          isRemote: false,
+          workplaceType: "Hybrid",
+          publishedAt: "2026-10-01T09:00:00.000+00:00",
+          jobUrl: "https://jobs.ashbyhq.com/acme/a1",
+          descriptionPlain: "TypeScript and Node.js",
+        },
+        { id: "a2", title: "Platform Engineer", location: "Remote - Europe", isRemote: true, jobUrl: "https://jobs.ashbyhq.com/acme/a2", descriptionHtml: "<p>Kubernetes</p>" },
+        { id: "a3", title: "Confidential", location: "Bucharest", isListed: false, jobUrl: "https://jobs.ashbyhq.com/acme/a3" },
+      ],
+    });
+    const rows = await ashbySource("Acme", "acme").fetch(signal());
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({ source: "ashby", sourceId: "acme:a1", title: "Software Engineer", locationText: "Bucharest; Cluj-Napoca", workMode: "hybrid", remoteScope: null, description: "TypeScript and Node.js" });
+    expect(rows[0]?.postedAt?.toISOString().slice(0, 10)).toBe("2026-10-01");
+    expect(rows[1]).toMatchObject({ workMode: "remote", remoteScope: "Remote - Europe", description: "Kubernetes", postedAt: null });
+  });
+
+  it("fails loudly on a wrong slug", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 404, statusText: "Not Found" })));
+    await expect(ashbySource("X", "nope").fetch(signal())).rejects.toThrow(/404/);
+  });
+});
+
+describe("arbeitnow", () => {
+  const page = (next: string | null) => ({
+    data: [
+      { slug: "remote-node-1", company_name: " Acme GmbH ", title: "Node.js Developer", description: "<p>Remote in EU</p>", remote: true, url: "https://www.arbeitnow.com/jobs/acme/remote-node-1", tags: [], location: "Europe", created_at: 1_791_000_000 },
+      { slug: "berlin-php-2", company_name: "Beta", title: "PHP Developer", description: "", remote: false, url: "https://www.arbeitnow.com/jobs/beta/berlin-php-2", tags: [], location: "Berlin", created_at: null },
+    ],
+    links: { next },
+  });
+
+  it("keeps remote jobs only by default and converts unix seconds", async () => {
+    stubJson(page(null));
+    const rows = await arbeitnowSource({ remoteOnly: true, pages: 1 }).fetch(signal());
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ source: "arbeitnow", sourceId: "remote-node-1", company: "Acme GmbH", workMode: "remote", remoteScope: "Europe", locationText: "Remote; Europe", description: "Remote in EU" });
+    expect(rows[0]?.postedAt?.getTime()).toBe(1_791_000_000 * 1000);
+  });
+
+  it("follows pagination up to the page limit and stops when there is no next page", async () => {
+    const fetchMock = vi.fn(async (url: string) => new Response(JSON.stringify(page(url.endsWith("page=1") ? "https://www.arbeitnow.com/api/job-board-api?page=2" : null)), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const rows = await arbeitnowSource({ remoteOnly: false, pages: 3 }).fetch(signal());
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(rows).toHaveLength(4);
   });
 });
