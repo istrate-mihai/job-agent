@@ -10,6 +10,9 @@ import { scorePosting } from "../scoring/scorePosting.js";
 const PER_POSTING_TIMEOUT_MS = 120_000; // includes possible 429 waits on free tiers
 // npm run score -- --rescore-under: re-score postings judged below level under the old rule (e.g. junior roles)
 const RESCORE_UNDER = process.argv.includes("--rescore-under");
+// npm run score -- --rescore-over: re-score postings judged above level, after changing seniority weight or limits
+const RESCORE_OVER = process.argv.includes("--rescore-over");
+const RESCORE_LIMIT = 200;
 
 async function main(): Promise<number> {
   const config = await loadSearchConfig();
@@ -32,10 +35,11 @@ async function main(): Promise<number> {
           // approved on a title-only guess, description fetched since: re-score (status stays approved)
           and(eq(postings.status, "approved"), eq(postingScores.confidence, "low"), sql`length(${postings.description}) >= 300`),
           RESCORE_UNDER ? and(eq(postings.status, "scored"), eq(postingScores.seniorityMatch, "under")) : undefined,
+          RESCORE_OVER ? and(eq(postings.status, "scored"), eq(postingScores.seniorityMatch, "over")) : undefined,
         ),
       )
       .orderBy(sql`${postings.postedAt} desc nulls last`) // freshest first: early applications matter most
-      .limit(RESCORE_UNDER ? 200 : config.scoring.batchSize)
+      .limit(RESCORE_UNDER || RESCORE_OVER ? RESCORE_LIMIT : config.scoring.batchSize)
   ).map((r) => r.p);
 
   if (pending.length === 0) {

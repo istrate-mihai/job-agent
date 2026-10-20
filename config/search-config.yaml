@@ -188,8 +188,10 @@ seniority:
   target: mid
   allow: [junior, junior-mid, mid, mid-senior]
   belowLevel: accept # junior or lower-paid roles are never scored down; you decide
-  yearsSoftLimit: 5 # posting demands exactly 5 years → -8 points
+  yearsSoftLimit: 5 # posting demands exactly 5 years → yearsSoftPenalty points
   yearsHardLimit: 6 # 6+ years demanded → capped just below reviewThreshold (hidden from the digest)
+  yearsSoftPenalty: 4 # was a fixed 8
+  weight: 0.5 # only half of the LLM's seniority deficit counts; 1 = old behaviour
 
 maxPostingAgeDays: 14
 

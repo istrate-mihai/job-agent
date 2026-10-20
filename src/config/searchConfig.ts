@@ -148,6 +148,9 @@ export const SearchConfigSchema = z.object({
     // Deterministic seniority guard (years parsed from the description): the LLM tends to over-credit 6+/8+ year roles
     yearsSoftLimit: z.number().int().min(1).max(15).default(5), // asks for exactly this many years → small penalty
     yearsHardLimit: z.number().int().min(1).max(15).default(6), // asks for this many or more → capped below the review threshold
+    yearsSoftPenalty: z.number().int().min(0).max(30).default(8), // points removed at the soft limit
+    // Share of the LLM's seniority deficit that counts: 1 = full penalty, 0.5 = half, 0 = seniority never lowers the score
+    weight: z.number().min(0).max(1).default(1),
   }),
   maxPostingAgeDays: z.number().int().positive(),
   // Company career pages (ATS): a listed role is an open role, so no age limit, just a "long-open" flag

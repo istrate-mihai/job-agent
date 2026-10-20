@@ -29,7 +29,7 @@ const SYSTEM_PROMPT = `You evaluate how well ONE job posting fits ONE candidate.
 Score these components as integers:
 - mustHaveCoverage (0-40): share of the posting's REQUIRED skills and experience the candidate demonstrably has. A skill listed as "in training only" counts as a gap.
 - stackOverlap (0-20): overlap between the posting's main stack and the candidate's practical stack, weighted by the candidate's stack priorities.
-- seniorityFit (0-15): 15 when the required experience matches the candidate's; lower when the role clearly asks for more (e.g. 6+ years, lead or architect duties). For roles below the candidate's level, follow the below-level rule in candidate_priorities.
+- seniorityFit (0-15): 15 when the required experience matches the candidate's; lower when the role clearly asks for more (e.g. 6+ years, lead or architect duties). For roles below the candidate's level, follow the below-level rule in candidate_priorities. A title word such as "Senior" or "Lead" is not evidence by itself: judge from the stated years and duties, and if the body asks for nothing beyond the candidate's level, treat it as a match.
 - goalAlignment (0-10): how much the role builds toward the candidate's career goals.
 seniorityMatch: "over" = role asks for more than the candidate has, "under" = role is below the candidate's level, "match" otherwise.
 primaryStack: the posting's main technologies in a few words (e.g. "PHP/Laravel + Vue", ".NET/C#").
@@ -41,7 +41,13 @@ Always respond by calling record_score (or with the JSON object, if asked for JS
 const CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2", "native"] as const;
 const REQUIRED_LANGUAGE_CAP = 40; // a mandatory language you don't speak at B2+ makes the role unrealistic
 const TITLE_ONLY_CHARS = 300;
-const YEARS_SOFT_PENALTY = 8;
+const SENIORITY_MAX = 15;
+
+// Scales only the deficit, so a perfect fit stays 15 and weight 1 reproduces the raw LLM score
+export function weightSeniorityFit(rawFit: number, weight: number): number {
+  const deficit = SENIORITY_MAX - Math.min(Math.max(rawFit, 0), SENIORITY_MAX);
+  return Math.round(SENIORITY_MAX - deficit * weight);
+}
 
 export interface ScoreResult {
   total: number;
@@ -109,7 +115,7 @@ export async function scorePosting(
   const components: ScoreComponents = {
     mustHaveCoverage: data.mustHaveCoverage,
     stackOverlap: data.stackOverlap,
-    seniorityFit: data.seniorityFit,
+    seniorityFit: weightSeniorityFit(data.seniorityFit, config.seniority.weight),
     goalAlignment: data.goalAlignment,
     locationFit: locationFit(posting.locationTier),
     penalties: [],
@@ -138,8 +144,11 @@ export async function scorePosting(
     }
     if (!gaps.some((g) => /\byears?\b/i.test(g))) gaps.push(`${years}+ years experience`);
   } else if (years !== null && years >= config.seniority.yearsSoftLimit) {
-    total = Math.max(0, total - YEARS_SOFT_PENALTY);
-    components.penalties.push(`asks for ${years}+ years → -${YEARS_SOFT_PENALTY}`);
+    const penalty = config.seniority.yearsSoftPenalty;
+    if (penalty > 0) {
+      total = Math.max(0, total - penalty);
+      components.penalties.push(`asks for ${years}+ years → -${penalty}`);
+    }
   }
 
   const recommendation =
