@@ -30,6 +30,7 @@
     "test:watch": "vitest",
     "outreach": "tsx --env-file=.env src/scripts/outreach.ts",
     "followup": "tsx --env-file=.env src/scripts/followup.ts",
+    "rejections": "tsx --env-file=.env src/scripts/rejections.ts",
     "stats": "tsx --env-file=.env src/scripts/stats.ts",
     "ui": "tsx --env-file=.env src/ui/server.ts --open",
     "db:down": "tsx --env-file=.env src/scripts/db.ts down",

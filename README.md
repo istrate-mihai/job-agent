@@ -277,6 +277,7 @@ npm run outreach -- <id> --role recruiter --to "Ana Pop" [--email ana@firma.ro]
                                           # connection note + LinkedIn message + email (Gmail draft with CV attached)
 npm run outreach -- sent <id> message     # after you send it (connect|message|email); `replied <id>` when they answer
 npm run followup                          # applied 7+ days, no answer → ready follow-up texts; `followup -- <id> sent`
+npm run rejections                        # rejection emails in Gmail: clear ones auto-marked (undo-able), the rest to confirm in Applications
 npm run stats                             # reply rate by source, score band, location, outreach vs ATS-only
 ```
 

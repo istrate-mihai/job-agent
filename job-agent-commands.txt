@@ -143,6 +143,7 @@ Reach a human, not just the ATS (after tailoring, before or right after applying
   send the connection note on LinkedIn, then: npm run outreach -- sent <id> connect
   when they reply: npm run outreach -- replied <id>
 Follow-ups (daily, 1 minute):  npm run followup   → send the texts →  npm run followup -- <id> sent
+Rejections (part of the daily run):  npm run rejections   → confirm|ignore|undo <id> for the uncertain ones (or in the GUI, Applications)
 Weekly:  npm run stats   → put effort where replies come from
 After updating (once):  npm run db:migrate   (creates the outreach table)   ·   npm run gmail:auth (only for --email drafts)
 

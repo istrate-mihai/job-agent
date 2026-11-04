@@ -194,6 +194,7 @@ async function refreshCounts() {
     set("toReview", c.toReview);
     set("active", c.approved + c.tailored + c.applied + c.responded);
     set("followUpsDue", c.followUpsDue);
+    set("rejectionsPending", c.rejectionsPending);
     set("setupIssues", o.cv === "ok" ? "" : "!");
     const pct = Math.min(100, Math.round((o.tokens.used / o.tokens.budget) * 100));
     $("#tokens").replaceChildren(
@@ -328,8 +329,51 @@ const STATUS_ORDER = ["approved", "tailored", "applied", "responded", "interview
 const STATUS_LABEL = { approved: "Approved, not tailored", tailored: "Tailored, ready to apply", applied: "Applied", responded: "Responded", interview: "Interview", offer: "Offer", rejected: "Rejected" };
 const FILTERS = { active: ["approved", "tailored", "applied", "responded", "interview", "offer"], todo: ["approved", "tailored"], waiting: ["applied"], all: STATUS_ORDER };
 
+// Rejection emails found in Gmail: the uncertain ones wait here for one click; automatic ones can be undone for a week
+function rejectionsSection(rej) {
+  if (!rej.pending.length && !rej.auto.length) return null;
+  const resolve = (action, c) => runAndRefresh("rejection-resolve", { action, id: c.id }, render);
+  const card = (c) =>
+    h(
+      "article.msg",
+      {},
+      h("header", {}, h("strong", {}, `${c.company} — ${c.title}`), h("span.tag.warn", {}, fmtDate(c.receivedAt))),
+      h("div", {}, h("strong", {}, "Subject: "), c.subject, h("span.sub", {}, ` · ${c.sender}`)),
+      c.snippet ? h("div.body", {}, c.snippet) : null,
+      c.reason ? h("div.sub", {}, `Why not automatic: ${c.reason}`) : null,
+      h(
+        "div.actions",
+        {},
+        h("button.danger", { onclick: () => resolve("confirm", c) }, "Mark rejected"),
+        h("button.btn", { onclick: () => resolve("ignore", c) }, "Ignore"),
+        h("a.ghost", { href: c.gmailUrl, target: "_blank", rel: "noopener noreferrer", role: "button" }, "Open email"),
+        h("button.ghost", { onclick: () => openPosting(c.postingId) }, "Open application"),
+      ),
+    );
+  return h(
+    "section.rejections",
+    {},
+    rej.pending.length ? h("h2.group-title", {}, "Possible rejections", h("span.count", {}, String(rej.pending.length))) : null,
+    rej.pending.length ? h("div.stack", {}, rej.pending.map(card)) : null,
+    rej.auto.length
+      ? h(
+          "div.sub",
+          { style: { margin: "8px 0 4px" } },
+          "Marked rejected automatically (last 7 days): ",
+          rej.auto.map((c, i) => [
+            i ? " · " : "",
+            `${c.company} — ${c.title} `,
+            h("a", { href: c.gmailUrl, target: "_blank", rel: "noopener noreferrer", title: c.subject }, "email"),
+            " ",
+            h("button.ghost", { onclick: () => resolve("undo", c), title: "Not a rejection: restore the application" }, "undo"),
+          ]),
+        )
+      : null,
+  );
+}
+
 async function viewApps() {
-  const rows = await api("/api/board");
+  const [rows, rej] = await Promise.all([api("/api/board"), api("/api/rejections").catch(() => ({ pending: [], auto: [] }))]);
   const shown = rows.filter((r) => FILTERS[state.appsFilter].includes(r.status));
   shown.sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) || (b.score ?? 0) - (a.score ?? 0));
   state.items = shown;
@@ -337,6 +381,7 @@ async function viewApps() {
   const due = rows.filter((r) => r.followUpDue).length;
   main.replaceChildren(
     head("Applications", `${rows.filter((r) => r.status === "applied").length} waiting for an answer${due ? `, ${due} due a follow-up` : ""}`),
+    rejectionsSection(rej) ?? "",
     h("div.filters", {}, chip("active", "In progress"), chip("todo", "To do"), chip("waiting", "Waiting"), chip("all", "All, incl. rejected")),
   );
   if (shown.length === 0) {

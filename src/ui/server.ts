@@ -10,7 +10,7 @@ import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
-import { decisions, llmUsage, outreach, postingScores, postings, statusEvents, tailorings } from "../db/schema.js";
+import { decisions, llmUsage, outreach, postingScores, postings, rejectionCandidates, statusEvents, tailorings } from "../db/schema.js";
 import { GMAIL_PATHS } from "../ingest/gmail/auth.js";
 import { normalizeText } from "../ingest/text.js";
 import { MasterCvSchema } from "../schemas/masterCv.js";
@@ -225,6 +225,37 @@ async function followUps() {
   }));
 }
 
+const AUTO_SHOWN_DAYS = 7; // automatic rejections stay listed (with Undo) for a week
+
+async function rejections() {
+  const rows = await db
+    .select({ c: rejectionCandidates, company: postings.company, title: postings.title, postingStatus: postings.status })
+    .from(rejectionCandidates)
+    .innerJoin(postings, eq(postings.id, rejectionCandidates.postingId))
+    .where(
+      sql`${rejectionCandidates.status} = 'pending' or (${rejectionCandidates.status} = 'auto' and ${rejectionCandidates.resolvedAt} >= now() - ${sql.raw(`interval '${AUTO_SHOWN_DAYS} days'`)})`,
+    )
+    .orderBy(desc(rejectionCandidates.receivedAt));
+  const shape = (r: (typeof rows)[number]) => ({
+    id: r.c.id,
+    postingId: r.c.postingId,
+    company: r.company,
+    title: r.title,
+    subject: r.c.subject,
+    sender: r.c.sender,
+    snippet: r.c.snippet,
+    reason: r.c.reason,
+    receivedAt: r.c.receivedAt,
+    // Opens the conversation in Gmail (the default signed-in account)
+    gmailUrl: `https://mail.google.com/mail/#all/${encodeURIComponent(r.c.threadId ?? r.c.messageId)}`,
+  });
+  return {
+    // A pending suggestion whose application was already closed some other way is no longer a question
+    pending: rows.filter((r) => r.c.status === "pending" && ["applied", "responded", "interview"].includes(r.postingStatus)).map(shape),
+    auto: rows.filter((r) => r.c.status === "auto").map(shape),
+  };
+}
+
 async function outreachQueue() {
   const rows = await db
     .select({ id: postings.id, company: postings.company, title: postings.title, status: postings.status, score: postingScores.total })
@@ -264,8 +295,13 @@ async function overview() {
     .from(llmUsage)
     .where(sql`${llmUsage.createdAt} >= date_trunc('day', now())`);
   const due = await dueFollowUps();
+  const [rej] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(rejectionCandidates)
+    .innerJoin(postings, eq(postings.id, rejectionCandidates.postingId))
+    .where(and(eq(rejectionCandidates.status, "pending"), inArray(postings.status, ["applied", "responded", "interview"])));
   return {
-    counts: { ...counts, followUpsDue: due.length },
+    counts: { ...counts, followUpsDue: due.length, rejectionsPending: rej?.n ?? 0 },
     tokens: { used: tokens?.used ?? 0, budget: config.agent.dailyTokenBudget },
     agentEnabled: config.agent.enabled,
     thresholds: { tailor: config.scoring.tailorThreshold, review: config.scoring.reviewThreshold },
@@ -408,6 +444,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   if (path === "/api/board") return send(res, 200, await board());
   if (path === "/api/followups") return send(res, 200, await followUps());
   if (path === "/api/outreach") return send(res, 200, await outreachQueue());
+  if (path === "/api/rejections") return send(res, 200, await rejections());
   if (path === "/api/stats") return send(res, 200, await allBreakdowns());
   if (path === "/api/setup") return send(res, 200, await setupStatus());
   if (path === "/api/jobs") return send(res, 200, listJobs());

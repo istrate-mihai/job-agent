@@ -17,7 +17,7 @@
     <button class="primary run-daily" data-run="daily" title="Start DB, check Gmail, ingest, enrich, score">Run daily pipeline</button>
     <ul class="nav">
       <li><a href="#review" data-view="review">Review <span class="count" data-count="toReview"></span></a></li>
-      <li><a href="#apps" data-view="apps">Applications <span class="count" data-count="active"></span></a></li>
+      <li><a href="#apps" data-view="apps">Applications <span class="count" data-count="active"></span><span class="count due" data-count="rejectionsPending" title="Possible rejections to confirm"></span></a></li>
       <li><a href="#outreach" data-view="outreach">Outreach</a></li>
       <li><a href="#followups" data-view="followups">Follow-ups <span class="count due" data-count="followUpsDue"></span></a></li>
       <li><a href="#stats" data-view="stats">Stats</a></li>
@@ -29,6 +29,7 @@
       <p class="rail-heading">Single steps</p>
       <button data-run="db-up">Start database</button>
       <button data-run="gmail-check">Check Gmail</button>
+      <button data-run="rejections">Check rejections</button>
       <button data-run="pipeline">Ingest + score</button>
       <button data-run="tailor">Tailor all approved</button>
       <button data-run="refilter">Re-apply filters</button>

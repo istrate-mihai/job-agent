@@ -190,3 +190,35 @@ export const outreach = pgTable(
 );
 
 export type OutreachRow = typeof outreach.$inferSelect;
+
+// Emails that look like rejections of a tracked application (src/scripts/rejections.ts). One row per (email, posting);
+// emails that matched no application are stored once with posting_id null and status "unmatched", so they are
+// never downloaded again. "auto" = marked rejected without asking (high confidence), undo-able from the UI.
+export const rejectionStatus = pgEnum("rejection_status", ["pending", "auto", "confirmed", "ignored", "undone", "unmatched"]);
+
+export const rejectionCandidates = pgTable(
+  "rejection_candidates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    messageId: varchar("message_id", { length: 64 }).notNull(),
+    threadId: varchar("thread_id", { length: 64 }),
+    postingId: uuid("posting_id").references(() => postings.id, { onDelete: "cascade" }),
+    confidence: varchar("confidence", { length: 8 }).notNull().default("low"),
+    status: rejectionStatus("status").notNull().default("pending"),
+    subject: text("subject").notNull(),
+    sender: text("sender").notNull(),
+    snippet: text("snippet").notNull().default(""),
+    reason: text("reason").notNull().default(""),
+    previousStatus: postingStatus("previous_status"), // what undo restores
+    receivedAt: timestamp("received_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("rejection_candidates_message_id_idx").on(t.messageId),
+    index("rejection_candidates_posting_id_idx").on(t.postingId),
+    uniqueIndex("rejection_candidates_message_posting_idx").on(t.messageId, t.postingId),
+  ],
+);
+
+export type RejectionCandidateRow = typeof rejectionCandidates.$inferSelect;

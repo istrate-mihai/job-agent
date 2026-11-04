@@ -28,6 +28,8 @@ export type CommandName =
   | "outreach"
   | "outreach-mark"
   | "followup-sent"
+  | "rejections"
+  | "rejection-resolve"
   | "cv-base"
   | "cv-import"
   | "validate-cv"
@@ -86,7 +88,7 @@ async function saveDescription(name: string, body: unknown): Promise<string> {
 export async function buildSteps(name: CommandName, p: Record<string, unknown>): Promise<{ title: string; steps: Step[] }> {
   switch (name) {
     case "daily":
-      return { title: "Daily run", steps: [DB_UP, script("gmailCheck"), ...PIPELINE] };
+      return { title: "Daily run", steps: [DB_UP, script("gmailCheck"), script("rejections"), ...PIPELINE] };
     case "db-up":
       return { title: "Start database", steps: [DB_UP] };
     case "gmail-check":
@@ -174,6 +176,13 @@ export async function buildSteps(name: CommandName, p: Record<string, unknown>):
     }
     case "followup-sent":
       return { title: "Log follow-up", steps: [script("followup", [id(p["id"]), "sent"])] };
+    case "rejections":
+      return { title: "Check rejections", steps: [script("rejections")] };
+    case "rejection-resolve": {
+      const action = oneOf(p["action"], ["confirm", "ignore", "undo"] as const);
+      const label = { confirm: "Mark rejected", ignore: "Ignore email", undo: "Undo rejection" }[action];
+      return { title: label, steps: [script("rejections", [action, id(p["id"])])] };
+    }
   }
 }
 
@@ -247,5 +256,5 @@ export const getJob = (jobId: string): Job | undefined => jobs.find((j) => j.id 
 
 export const COMMAND_NAMES: readonly CommandName[] = [
   "daily", "db-up", "gmail-check", "pipeline", "ingest", "enrich", "score", "refilter", "tailor", "decide", "track",
-  "describe", "add", "outreach", "outreach-mark", "followup-sent", "cv-base", "cv-import", "validate-cv", "gmail-setup",
+  "describe", "add", "outreach", "outreach-mark", "followup-sent", "rejections", "rejection-resolve", "cv-base", "cv-import", "validate-cv", "gmail-setup",
 ];
