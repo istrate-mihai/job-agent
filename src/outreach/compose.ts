@@ -20,11 +20,11 @@ export const MESSAGE_MAX_CHARS = 600;
 export const EMAIL_MAX_WORDS = 150;
 const EMAIL_SUBJECT_MAX_CHARS = 90;
 
-const RO_LOCATION_RE = /romania|bucure|brasov|cluj|iasi|timisoara|sibiu|craiova|constanta|oradea/i;
-
+// English and Romanian spellings, with and without diacritics ("Bucharest", "București", "Brașov")
+const RO_LOCATION_RE = /rom[aâ]nia|bucharest|bucure[sș]ti|bra[sș]ov|cluj|ia[sș]i|timi[sș]oara|sibiu|craiova|constan[tț]a|oradea/i;
 // One rule for every outreach text: recruiters for roles in Romania read Romanian, even when the ad is in English
 export function outreachLanguage(posting: PostingRow): Language {
-  return detectLanguage(posting) === "ro" || RO_LOCATION_RE.test(posting.locationText) ? "ro" : "en";
+  return detectLanguage(posting) === "ro" || RO_LOCATION_RE.test(`${posting.locationText} ${posting.company}`) ? "ro" : "en";
 }
 
 // Shortens "Full Stack Developer (m/f/d) Webshop Team, Bucharest (Romania)" to "Full Stack Developer"
