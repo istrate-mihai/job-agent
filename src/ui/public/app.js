@@ -416,8 +416,17 @@ async function openPosting(id) {
   if (p.status === "approved" || p.status === "tailored") {
     actions.push(
       act("Mark applied", p.status === "tailored" ? "primary" : "btn", async () => {
-        const r = await ask(`Applied to ${p.company}`, [{ name: "note", label: "Where did you apply?", placeholder: "LinkedIn Easy Apply, careers site, email…" }], "Mark applied");
-        if (r) runAndRefresh("track", { id, status: "applied", note: r.note }, refresh);
+        const r = await ask(
+          `Applied to ${p.company}`,
+          [
+            { name: "note", label: "Where did you apply?", placeholder: "LinkedIn Easy Apply, careers site, email…" },
+            // Off by default: the 30-day company cooldown should block by accident, never by default
+            { name: "force", type: "checkbox", label: "Override company cooldown (already applied here < 30 days ago, different team)", value: false },
+          ],
+          "Mark applied",
+        );
+        // Checkbox values may come back as boolean or "on"; the server only accepts strict true
+        if (r) runAndRefresh("track", { id, status: "applied", note: r.note, force: r.force === true || r.force === "on" }, refresh);
       }),
     );
   }
