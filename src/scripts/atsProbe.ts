@@ -161,10 +161,18 @@ async function main(): Promise<number> {
     console.log(`\n▶ ${arg}`);
     let candidates: Candidate[];
     if (isUrl) {
-      const found = await candidatesFromPage(arg);
-      candidates = found.candidates;
-      if (found.unsupported.length > 0) console.log(`  uses ${found.unsupported.join(", ")} (no feed source; rely on LinkedIn/eJobs email alerts)`);
-      if (candidates.length === 0) console.log("  no supported ATS link on the page (JS-rendered page? try the company name instead)");
+      // One unreachable page (DNS, TLS, timeout) must not abort the rest of the batch
+      try {
+        const found = await candidatesFromPage(arg);
+        candidates = found.candidates;
+        if (found.unsupported.length > 0) console.log(`  uses ${found.unsupported.join(", ")} (no feed source; rely on LinkedIn/eJobs email alerts)`);
+        if (candidates.length === 0) console.log("  no supported ATS link on the page (JS-rendered page? try the company name instead)");
+      } catch (err: unknown) {
+        const cause = err instanceof Error && err.cause instanceof Error ? err.cause : err;
+        const code = cause instanceof Error && "code" in cause ? String(cause.code) : "";
+        console.log(`  ✖ page unreachable${code ? ` (${code})` : ""}: ${cause instanceof Error ? cause.message : String(cause)}`);
+        continue;
+      }
     } else {
       const allAts: Ats[] = ["smartrecruiters", "greenhouse", "lever", "lever-eu", "ashby", "workable", "recruitee", "personio-de", "personio-com"];
       candidates = slugGuesses(arg).flatMap((slug) => allAts.map((ats) => ({ ats, slug })));
@@ -172,7 +180,8 @@ async function main(): Promise<number> {
     let hits = 0;
     for (const c of candidates) {
       const hit = await probe(c, company);
-      if (hit) {
+      // Some ATS (e.g. Workable) answer 200 for any slug: a feed with 0 open roles is not evidence of a real account
+      if (hit && hit.total > 0) {
         hits += 1;
         console.log(`  ✔ ${hit.ats}/${hit.slug}: ${hit.total} open, ${hit.romania} in Romania`);
         console.log(`    ${yamlLine(hit, company)}`);

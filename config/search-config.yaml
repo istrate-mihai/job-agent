@@ -88,6 +88,7 @@ sources:
     - { company: Stripe, boardToken: stripe } # 7 RO (Bucharest)
     - { company: MongoDB, boardToken: mongodb } # 5 RO
     - { company: Thoughtworks, boardToken: thoughtworks } # 5 RO
+    - { company: eMAG, boardToken: emag } # 21 RO (Bucharest) — PHP/Laravel heavy, fits the main stack
   # Slug from a careers link: jobs.lever.co/<slug> (jobs.eu.lever.co/<slug> → region: eu)
   lever:
     - { company: Caseware, slug: caseware } # 4 RO (Bucharest)
