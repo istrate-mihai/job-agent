@@ -9,7 +9,7 @@ import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
 import { outreach, postings } from "../db/schema.js";
 import { dueFollowUps, FOLLOW_UP_AFTER_DAYS } from "../reporting/followups.js";
-import { followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
+import { followUpConnectionNote, followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
 import { loadMasterCv } from "../profile/candidateProfile.js";
 
 
@@ -26,14 +26,22 @@ async function list(): Promise<number> {
   const sections: string[] = [`# Follow-ups — ${new Date().toISOString().slice(0, 10)}`, ""];
   for (const r of due) {
     const msg = followUpMessage(r.p, cv, r.days, r.contact);
+    const note = followUpConnectionNote(r.p, r.contact);
     const where = r.contactEmail ? `email ${r.contactEmail}` : r.contact ? `LinkedIn: ${r.contact}` : "no contact yet → find one first";
     console.log(`\n[${r.p.id.slice(0, 8)}] ${r.p.company} — ${r.p.title} · applied ${r.days}d ago · ${where}`);
     if (!r.contact) console.log(`  ${recruiterSearchLinks(r.p.company, r.p.title)[0]?.url ?? ""}`);
+    if (!r.contact) console.log(`  Connect note (${note.length}/200): ${note}`);
     sections.push(
       `## ${r.p.company} — ${r.p.title}`,
       `- id: ${r.p.id.slice(0, 8)} · applied ${r.days} days ago · follow-up #${r.followUps + 1} · ${where}`,
       `- Posting: ${r.p.url}`,
       ...(r.contact ? [] : recruiterSearchLinks(r.p.company, r.p.title).slice(0, 2).map((l) => `- [${l.label}](${l.url})`)),
+      "",
+      `**Connection note** (Connect → Add a note, ${note.length}/200):`,
+      "",
+      "```text",
+      note,
+      "```",
       "",
       `**Subject:** ${msg.subject}`,
       "",

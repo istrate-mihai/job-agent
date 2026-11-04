@@ -14,7 +14,7 @@ import { decisions, llmUsage, outreach, postingScores, postings, statusEvents, t
 import { GMAIL_PATHS } from "../ingest/gmail/auth.js";
 import { normalizeText } from "../ingest/text.js";
 import { MasterCvSchema } from "../schemas/masterCv.js";
-import { followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
+import { followUpConnectionNote, followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
 import { loadMasterCv } from "../profile/candidateProfile.js";
 import { dueFollowUps } from "../reporting/followups.js";
 import { allBreakdowns } from "../reporting/stats.js";
@@ -219,6 +219,8 @@ async function followUps() {
     contact: r.contact,
     contactEmail: r.contactEmail,
     message: followUpMessage(r.p, cv, r.days, r.contact),
+    // For recruiters you aren't connected to: paste into Connect → Add a note (≤ 200 chars, free)
+    connectNote: r.contactEmail ? null : followUpConnectionNote(r.p, r.contact),
     searchLinks: r.contact ? [] : recruiterSearchLinks(r.p.company, r.p.title).slice(0, 2),
   }));
 }

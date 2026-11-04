@@ -659,11 +659,20 @@ async function viewFollowups() {
           h("header", {}, h("strong", {}, `${f.company} — ${f.title}`), h("span.tag.warn", {}, `applied ${f.days}d ago · follow-up ${f.followUps + 1} of 2`)),
           h("div", {}, f.contactEmail ? `Send to ${f.contactEmail}` : f.contact ? `Send on LinkedIn to ${f.contact}` : "No contact yet: find the recruiter first"),
           f.searchLinks.length ? h("div.tags", {}, f.searchLinks.map((l) => h("a.tag.info", { href: l.url, target: "_blank", rel: "noopener noreferrer" }, l.label))) : null,
+          f.connectNote
+            ? h(
+                "div",
+                {},
+                h("strong", {}, `Connection note (${f.connectNote.length}/200): `),
+                h("div.body", {}, f.connectNote),
+              )
+            : null,
           h("div", {}, h("strong", {}, "Subject: "), f.message.subject),
           h("div.body", {}, f.message.body),
           h(
             "div.actions",
             {},
+            f.connectNote ? h("button.btn", { onclick: () => copy(f.connectNote, "Connection note copied") }, "Copy note") : null,
             h("button.btn", { onclick: () => copy(f.message.body, "Follow-up copied") }, "Copy message"),
             h("button.ghost", { onclick: () => copy(f.message.subject, "Subject copied") }, "Copy subject"),
             h("button.primary", { onclick: () => runAndRefresh("followup-sent", { id: f.id }, render) }, "I sent it"),

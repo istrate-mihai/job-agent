@@ -205,3 +205,33 @@ export function followUpMessage(posting: PostingRow, cv: MasterCv, daysSinceAppl
     ].join("\n"),
   };
 }
+
+const RO_LOCATION_RE = /romania|bucure|brasov|cluj|iasi|timisoara|sibiu|craiova|constanta|oradea/i;
+
+// Shortens "Full Stack Developer (m/f/d) Webshop Team, Bucharest (Romania)" to "Full Stack Developer"
+function shortTitle(title: string, max: number): string {
+const raw = title.split(/\s[-–|]\s|\s\(|,/)[0]?.trim() ?? title;
+  // ALL-CAPS titles read as shouting in a personal note: "JUNIOR SOFTWARE ENGINEER" → "Junior Software Engineer"
+  const core = raw === raw.toUpperCase() ? raw.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase()) : raw;
+
+  return core.length <= max ? core : `${core.slice(0, max - 1).trimEnd()}…`;
+}
+
+// Free, deterministic note for the "Connect + Add a note" flow on recruiters you are not connected to.
+// No LLM: a follow-up nudge needs the role and the ask, nothing more. Hard-capped at CONNECT_MAX_CHARS.
+export function followUpConnectionNote(posting: PostingRow, recipientName: string | null): string {
+  const ro = RO_LOCATION_RE.test(posting.locationText);
+  const first = recipientName?.trim().split(/\s+/)[0] ?? null;
+  const build = (title: string): string =>
+    ro
+      ? `${first ? `Bună, ${first}!` : "Bună ziua!"} Am aplicat pentru ${title} la ${posting.company}. Full-stack PHP/Laravel, Vue, Node.js, Zend PHP Certified. Aș aprecia un update despre proces. Mulțumesc!`
+      : `${first ? `Hi ${first},` : "Hi,"} I applied for ${title} at ${posting.company}. Full-stack PHP/Laravel, Vue, Node.js, Zend PHP Certified. I'd appreciate any update on the process. Thanks!`;
+
+  // Shrink only the title until the note fits; the ask and the proof stay intact
+  for (let max = 60; max >= 15; max -= 5) {
+    const note = build(shortTitle(posting.title, max));
+    if (note.length <= CONNECT_MAX_CHARS) return note;
+  }
+  return build("this role").slice(0, CONNECT_MAX_CHARS);
+}
+
