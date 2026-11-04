@@ -41,7 +41,7 @@ flowchart LR
   P --> A[I review and apply]
   A --> O[Outreach drafts<br/>recruiter note · email]
   A --> K[Tracking<br/>applied → interview → offer]
-  K --> FU[Follow-up after 7 days<br/>stats by source]
+  K --> FU[Follow-up after 14 days<br/>stats by source]
 ```
 
 | Step | What happens | LLM? |
@@ -53,7 +53,7 @@ flowchart LR
 | **Tailor** | For approved postings only. The LLM **selects** bullet IDs from the master CV and writes a summary and a cover letter; code enforces layout rules and validates every claim. | yes |
 | **Render** | HTML → PDF with Playwright; content is trimmed (least relevant first) until the CV fits two pages. | no |
 | **Outreach** | Drafts a LinkedIn connection note (≤200 chars), a LinkedIn message and an email to a recruiter or hiring manager, with search links to find the person; optionally a Gmail draft with the CV attached. Same claims validator as the letter. | yes |
-| **Track** | Status history, a per-company cooldown, follow-up texts after 7 days without a reply (max two), and reply-rate stats by source, score band, location and outreach vs. ATS-only. | no |
+| **Track** | Status history, a per-company cooldown, follow-up texts after 14 days without a reply, a second one a week later, and reply-rate stats by source, score band, location and outreach vs. ATS-only. | no |
 
 ---
 
@@ -276,7 +276,7 @@ npm run outreach                          # tailored/applied postings with no re
 npm run outreach -- <id> --role recruiter --to "Ana Pop" [--email ana@firma.ro]
                                           # connection note + LinkedIn message + email (Gmail draft with CV attached)
 npm run outreach -- sent <id> message     # after you send it (connect|message|email); `replied <id>` when they answer
-npm run followup                          # applied 7+ days, no answer → ready follow-up texts; `followup -- <id> sent`
+npm run followup                          # applied 14+ days, no answer → ready follow-up texts; `followup -- <id> sent`
 npm run rejections                        # rejection emails in Gmail: clear ones auto-marked (undo-able), the rest to confirm in Applications
 npm run stats                             # reply rate by source, score band, location, outreach vs ATS-only
 ```

@@ -16,7 +16,7 @@ import { normalizeText } from "../ingest/text.js";
 import { MasterCvSchema } from "../schemas/masterCv.js";
 import { followUpConnectionNote, followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
 import { loadMasterCv } from "../profile/candidateProfile.js";
-import { dueFollowUps } from "../reporting/followups.js";
+import { BETWEEN_FOLLOW_UPS_DAYS, dueFollowUps, FIRST_FOLLOW_UP_DAYS } from "../reporting/followups.js";
 import { allBreakdowns } from "../reporting/stats.js";
 import { dbMode, isUp, startDb } from "../db/local.js";
 import { buildSteps, COMMAND_NAMES, enqueue, getJob, listJobs, type CommandName } from "./commands.js";
@@ -169,7 +169,7 @@ async function board() {
       days,
       appliedDays: daysSince(r.appliedAt),
       warningCount: r.warnings?.length ?? 0,
-      followUpDue: r.status === "applied" && days !== null && days >= 7 && (touched === null || touched >= 7),
+      followUpDue: r.status === "applied" && days !== null && days >= FIRST_FOLLOW_UP_DAYS && (touched === null || touched >= BETWEEN_FOLLOW_UPS_DAYS),
     };
   });
 }
@@ -305,6 +305,7 @@ async function overview() {
     tokens: { used: tokens?.used ?? 0, budget: config.agent.dailyTokenBudget },
     agentEnabled: config.agent.enabled,
     thresholds: { tailor: config.scoring.tailorThreshold, review: config.scoring.reviewThreshold },
+    followUp: { first: FIRST_FOLLOW_UP_DAYS, between: BETWEEN_FOLLOW_UPS_DAYS },
     cv: await loadMasterCv()
       .then((cv) => (cv.basics.fullName === "Alex Ion Popescu" ? "example" : "ok"))
       .catch(() => "missing"),

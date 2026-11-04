@@ -183,12 +183,14 @@ const state = {
   reviewAll: false,
   appsFilter: "active",
   thresholds: { tailor: 70, review: 50 },
+  followUp: { first: 14, between: 7 },
 };
 
 async function refreshCounts() {
   try {
     const o = await api("/api/overview");
     state.thresholds = o.thresholds;
+    if (o.followUp) state.followUp = o.followUp;
     const c = o.counts;
     const set = (k, v) => document.querySelectorAll(`[data-count="${k}"]`).forEach((el) => (el.textContent = v ? String(v) : ""));
     set("toReview", c.toReview);
@@ -688,9 +690,9 @@ async function viewOutreach() {
 async function viewFollowups() {
   const items = await api("/api/followups");
   state.items = [];
-  main.replaceChildren(head("Follow-ups", items.length ? `${plural(items.length, "application")} silent for 7+ days` : "Nothing due"));
+  main.replaceChildren(head("Follow-ups", items.length ? `${plural(items.length, "application")} silent for ${state.followUp.first}+ days` : "Nothing due"));
   if (!items.length) {
-    main.append(h("div.empty", {}, h("p", {}, "No follow-ups due. Applications show up here 7 days after you apply, at most twice.")));
+    main.append(h("div.empty", {}, h("p", {}, `No follow-ups due. Applications show up here ${state.followUp.first} days after you apply, then once more ${state.followUp.between} days later.`)));
     return;
   }
   main.append(

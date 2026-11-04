@@ -186,7 +186,7 @@ export function recruiterSearchLinks(company: string, title: string): { label: s
   ];
 }
 
-/** Follow-up after ~7 days of silence: deterministic template, no LLM call, so it is free and never invents anything. */
+/** Follow-up after ~14 days of silence: deterministic template, no LLM call, so it is free and never invents anything. */
 export function followUpMessage(posting: PostingRow, cv: MasterCv, daysSinceApplied: number, recipientName: string | null): { subject: string; body: string } {
   const language = outreachLanguage(posting);
   const first = recipientName?.trim().split(/\s+/)[0] ?? null;

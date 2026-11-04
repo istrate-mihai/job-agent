@@ -1,5 +1,5 @@
 // src/scripts/followup.ts
-// Applied ≥7 days ago, no answer, no follow-up in the last 7 days → ready-to-send follow-up text (no LLM, free).
+// Applied ≥14 days ago, no answer, no follow-up in the last 7 days → ready-to-send follow-up text (no LLM, free).
 // Usage: npm run followup                    → list + messages, saved to output/followups/<date>.md
 //        npm run followup -- <id> sent       → log that you sent it (silences the reminder for 7 days)
 import { mkdir, writeFile } from "node:fs/promises";
@@ -8,7 +8,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
 import { outreach, postings } from "../db/schema.js";
-import { dueFollowUps, FOLLOW_UP_AFTER_DAYS } from "../reporting/followups.js";
+import { BETWEEN_FOLLOW_UPS_DAYS, dueFollowUps } from "../reporting/followups.js";
 import { followUpConnectionNote, followUpMessage, recruiterSearchLinks } from "../outreach/compose.js";
 import { loadMasterCv } from "../profile/candidateProfile.js";
 
@@ -82,7 +82,7 @@ async function markSent(idPrefix: string): Promise<number> {
     .limit(1);
   if (drafted) await db.update(outreach).set({ status: "sent", sentAt: new Date() }).where(eq(outreach.id, drafted.id));
   else await db.insert(outreach).values({ postingId: p.id, kind: "followup", status: "sent", body: "(follow-up template)", sentAt: new Date() });
-  console.log(`✔ Follow-up logged: ${p.company} — ${p.title}. Next reminder in ${FOLLOW_UP_AFTER_DAYS} days if still silent.`);
+  console.log(`✔ Follow-up logged: ${p.company} — ${p.title}. Next reminder in ${BETWEEN_FOLLOW_UPS_DAYS} days if still silent.`);
   return 0;
 }
 

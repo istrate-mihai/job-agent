@@ -56,7 +56,7 @@ DAILY ROUTINE (in this order)
   npm run track -- <id> applied "where/how"
 
 7) Follow up:
-  npm run track                   board: what's next per posting, "← follow up" after 7 days
+  npm run track                   board: what's next per posting, "← follow up" after 14 days
   npm run score -- --rescore-under   re-score postings marked below level (junior) under the old rule
   npm run track -- <id> responded | interview | offer | rejected
 

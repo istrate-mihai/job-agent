@@ -4,7 +4,10 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { outreach, postings, statusEvents } from "../db/schema.js";
 
-export const FOLLOW_UP_AFTER_DAYS = 7;
+// Hiring pipelines routinely sit 2-3 weeks between steps: nudging earlier reads as impatience and rarely gets an answer
+export const FIRST_FOLLOW_UP_DAYS = 14;
+export const BETWEEN_FOLLOW_UPS_DAYS = 7; // second nudge, a week after the first
+
 export const MAX_FOLLOW_UPS = 2; // a third nudge hurts more than it helps
 const DAY_MS = 86_400_000;
 // Fully qualified on purpose: in a single-table select drizzle renders ${postings.id} as a bare "id", which inside
@@ -27,8 +30,8 @@ export async function dueFollowUps() {
   const now = Date.now();
   return rows
     .map((r) => ({ ...r, days: r.appliedAt ? Math.floor((now - new Date(r.appliedAt).getTime()) / DAY_MS) : 0 }))
-    .filter((r) => r.days >= FOLLOW_UP_AFTER_DAYS && r.followUps < MAX_FOLLOW_UPS)
-    .filter((r) => r.lastFollowUp === null || now - new Date(r.lastFollowUp).getTime() >= FOLLOW_UP_AFTER_DAYS * DAY_MS)
+    .filter((r) => r.days >= FIRST_FOLLOW_UP_DAYS && r.followUps < MAX_FOLLOW_UPS)
+    .filter((r) => r.lastFollowUp === null || now - new Date(r.lastFollowUp).getTime() >= BETWEEN_FOLLOW_UPS_DAYS * DAY_MS)
     .sort((a, b) => b.days - a.days);
 
 }

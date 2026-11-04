@@ -7,6 +7,7 @@ import { loadSearchConfig } from "../config/searchConfig.js";
 import { db, pool } from "../db/client.js";
 import { outreach, postings, statusEvents, tailorings } from "../db/schema.js";
 import { normalizeText } from "../ingest/text.js";
+import { BETWEEN_FOLLOW_UPS_DAYS, FIRST_FOLLOW_UP_DAYS } from "../reporting/followups.js";
 
 type Status = (typeof postings.$inferSelect)["status"];
 
@@ -18,7 +19,6 @@ const TRANSITIONS: Readonly<Record<string, readonly Status[]>> = {
   rejected: ["applied", "responded", "interview"],
 };
 const ACTIVE: Status[] = ["applied", "responded", "interview", "offer"];
-const FOLLOW_UP_DAYS = 7;
 const DAY_MS = 86_400_000;
 
 async function board(): Promise<void> {
@@ -48,7 +48,7 @@ async function board(): Promise<void> {
     const days = r.since ? Math.floor((now - new Date(r.since).getTime()) / DAY_MS) : null;
     const age = days === null ? "" : ` · ${days}d`;
     const touchedDays = r.lastTouch ? Math.floor((now - new Date(r.lastTouch).getTime()) / DAY_MS) : null;
-    const quiet = days !== null && days >= FOLLOW_UP_DAYS && (touchedDays === null || touchedDays >= FOLLOW_UP_DAYS);
+    const quiet = days !== null && days >= FIRST_FOLLOW_UP_DAYS && (touchedDays === null || touchedDays >= BETWEEN_FOLLOW_UPS_DAYS);
     const nudge = r.status === "applied" && quiet ? "  ← follow up (npm run followup)" : "";
     const person = (r.status === "applied" || r.status === "tailored") && !r.contacted ? "  · no recruiter contacted" : "";
     const next = r.status === "approved" ? "  ← npm run tailor" : r.status === "tailored" ? "  ← review + apply" : "";
