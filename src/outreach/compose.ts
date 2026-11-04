@@ -20,6 +20,21 @@ export const MESSAGE_MAX_CHARS = 600;
 export const EMAIL_MAX_WORDS = 150;
 const EMAIL_SUBJECT_MAX_CHARS = 90;
 
+const RO_LOCATION_RE = /romania|bucure|brasov|cluj|iasi|timisoara|sibiu|craiova|constanta|oradea/i;
+
+// One rule for every outreach text: recruiters for roles in Romania read Romanian, even when the ad is in English
+export function outreachLanguage(posting: PostingRow): Language {
+  return detectLanguage(posting) === "ro" || RO_LOCATION_RE.test(posting.locationText) ? "ro" : "en";
+}
+
+// Shortens "Full Stack Developer (m/f/d) Webshop Team, Bucharest (Romania)" to "Full Stack Developer"
+function shortTitle(title: string, max: number): string {
+  const raw = title.split(/\s[-–|]\s|\s\(|,/)[0]?.trim() ?? title;
+  // ALL-CAPS titles read as shouting in a personal note: "JUNIOR SOFTWARE ENGINEER" → "Junior Software Engineer"
+  const core = raw === raw.toUpperCase() ? raw.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase()) : raw;
+  return core.length <= max ? core : `${core.slice(0, max - 1).trimEnd()}…`;
+}
+
 export interface OutreachDraft {
   connectionNote: string;
   linkedinMessage: string;
@@ -109,7 +124,7 @@ export async function composeOutreach(
   availability: string | null,
   signal: AbortSignal,
 ): Promise<OutreachDraft> {
-  const language = detectLanguage(posting);
+  const language = outreachLanguage(posting);
   const applied = ["applied", "responded", "interview"].includes(posting.status);
   const attr = (v: string): string => v.replace(/"/g, "'");
   const user = [
@@ -173,31 +188,38 @@ export function recruiterSearchLinks(company: string, title: string): { label: s
 
 /** Follow-up after ~7 days of silence: deterministic template, no LLM call, so it is free and never invents anything. */
 export function followUpMessage(posting: PostingRow, cv: MasterCv, daysSinceApplied: number, recipientName: string | null): { subject: string; body: string } {
-  const language = detectLanguage(posting);
-  const first = recipientName?.split(/\s+/)[0] ?? null;
+  const language = outreachLanguage(posting);
+  const first = recipientName?.trim().split(/\s+/)[0] ?? null;
   const name = cv.basics.fullName;
+  const title = shortTitle(posting.title, 70);
   if (language === "ro") {
     return {
-      subject: `Follow-up: candidatura pentru ${posting.title}`,
+      subject: `Candidatura ${title} – ${name}`,
       body: [
         first ? `Bună ziua, ${first},` : "Bună ziua,",
         "",
-        `Am aplicat acum ${daysSinceApplied} zile pentru poziția de ${posting.title} la ${posting.company} și revin cu un scurt mesaj pentru a confirma că sunt în continuare interesat de rol.`,
-        `Sunt disponibil pentru o discuție oricând vă este convenabil și pot trimite orice informații suplimentare de care aveți nevoie.`,
+        `Am aplicat acum ${daysSinceApplied} zile pentru poziția de ${title} la ${posting.company} și revin pentru a confirma că sunt în continuare foarte interesat de rol.`,
         "",
-        "Cu stimă,",
+        "Pe scurt: 3 ani ca Full Stack Web Developer (PHP, TypeScript, MySQL), Zend PHP Certified Engineer, plus proiecte în producție cu Laravel, Vue 3, Node.js/Express și PostgreSQL. Codul e public: github.com/istrate-mihai",
+        "",
+        "Ați putea să-mi spuneți în ce stadiu este procesul? Sunt disponibil pentru o discuție oricând vă este convenabil.",
+        "",
+        "Mulțumesc,",
         name,
         `${cv.basics.phone} · ${cv.basics.email}`,
       ].join("\n"),
     };
   }
   return {
-    subject: `Following up: ${posting.title} application`,
+    subject: `${title} application – ${name}`,
     body: [
       first ? `Hello ${first},` : "Hello,",
       "",
-      `I applied for the ${posting.title} role at ${posting.company} ${daysSinceApplied} days ago and wanted to confirm I am still very interested in the position.`,
-      `I am available for a conversation whenever it suits you and happy to send anything else that helps your review.`,
+      `I applied for the ${title} role at ${posting.company} ${daysSinceApplied} days ago and wanted to confirm I am still very interested in the position.`,
+      "",
+      "In short: 3 years as a Full Stack Web Developer (PHP, TypeScript, MySQL), Zend PHP Certified Engineer, plus production projects with Laravel, Vue 3, Node.js/Express and PostgreSQL. My code is public: github.com/istrate-mihai",
+      "",
+      "Could you let me know where the process stands? I'm available for a conversation whenever it suits you.",
       "",
       "Best regards,",
       name,
@@ -206,21 +228,10 @@ export function followUpMessage(posting: PostingRow, cv: MasterCv, daysSinceAppl
   };
 }
 
-const RO_LOCATION_RE = /romania|bucure|brasov|cluj|iasi|timisoara|sibiu|craiova|constanta|oradea/i;
-
-// Shortens "Full Stack Developer (m/f/d) Webshop Team, Bucharest (Romania)" to "Full Stack Developer"
-function shortTitle(title: string, max: number): string {
-const raw = title.split(/\s[-–|]\s|\s\(|,/)[0]?.trim() ?? title;
-  // ALL-CAPS titles read as shouting in a personal note: "JUNIOR SOFTWARE ENGINEER" → "Junior Software Engineer"
-  const core = raw === raw.toUpperCase() ? raw.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase()) : raw;
-
-  return core.length <= max ? core : `${core.slice(0, max - 1).trimEnd()}…`;
-}
-
 // Free, deterministic note for the "Connect + Add a note" flow on recruiters you are not connected to.
 // No LLM: a follow-up nudge needs the role and the ask, nothing more. Hard-capped at CONNECT_MAX_CHARS.
 export function followUpConnectionNote(posting: PostingRow, recipientName: string | null): string {
-  const ro = RO_LOCATION_RE.test(posting.locationText);
+  const ro = outreachLanguage(posting) === "ro";
   const first = recipientName?.trim().split(/\s+/)[0] ?? null;
   const build = (title: string): string =>
     ro
@@ -232,6 +243,5 @@ export function followUpConnectionNote(posting: PostingRow, recipientName: strin
     const note = build(shortTitle(posting.title, max));
     if (note.length <= CONNECT_MAX_CHARS) return note;
   }
-  return build("this role").slice(0, CONNECT_MAX_CHARS);
+  return build(ro ? "acest rol" : "this role").slice(0, CONNECT_MAX_CHARS);
 }
-
