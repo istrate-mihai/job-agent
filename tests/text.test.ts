@@ -29,4 +29,11 @@ describe("canonicalUrl", () => {
   it("strips tracking parameters from other job sites", () => {
     expect(canonicalUrl("https://www.ejobs.ro/job/123?utm_source=alert&x=1#top")).toBe("https://www.ejobs.ro/job/123?x=1");
   });
+
+  it("strips StepStone alert parameters only on StepStone", () => {
+    expect(canonicalUrl("https://www.stepstone.de/stellenangebote--Full-Stack-Developer-Berlin-Acme--12345678-inline.html?cid=AL_123&wt_mc=alert&rltr=2_2")).toBe(
+      "https://www.stepstone.de/stellenangebote--Full-Stack-Developer-Berlin-Acme--12345678-inline.html",
+    );
+    expect(canonicalUrl("https://example.com/job?cid=42")).toBe("https://example.com/job?cid=42");
+  });
 });

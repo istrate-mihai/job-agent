@@ -120,6 +120,8 @@ const PLATFORM_DOMAINS = [
   "linkedin.com",
   "ejobs.ro",
   "bestjobs.eu",
+  "stepstone.de",
+  "stepstone.com",
   "hipo.ro",
   "gmail.com",
   "yahoo.com",

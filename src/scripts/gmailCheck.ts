@@ -7,7 +7,7 @@ import { loadGmailAuth } from "../ingest/gmail/auth.js";
 
 const LOOKBACK_DAYS = 14;
 const BROAD_QUERY =
-  `newer_than:${LOOKBACK_DAYS}d (from:(linkedin.com OR ejobs.ro OR bestjobs.eu OR hipo.ro OR jobicy.com) ` +
+  `newer_than:${LOOKBACK_DAYS}d (from:(linkedin.com OR ejobs.ro OR bestjobs.eu OR hipo.ro OR jobicy.com OR stepstone) ` +
   `OR subject:("job alert" OR jobs OR joburi OR "locuri de munca" OR "new jobs" OR "joburi noi"))`;
 
 const config = await loadSearchConfig();

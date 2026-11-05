@@ -1,5 +1,8 @@
 // src/ingest/gmail/canonicalUrl.ts
 const TRACKING_PARAMS = /^(utm_.*|trackingid|refid|lipi|midtoken|midsig|trk|trkemail|eid|otptoken|mc_cid|mc_eid|gclid|fbclid)$/i;
+// StepStone alert links add these; only stripped on StepStone hosts, since "cid" can be a real id elsewhere
+const STEPSTONE_PARAMS = /^(wt_mc|cid|rltr|ici|suid)$/i;
+const STEPSTONE_HOST = /(^|\.)stepstone\.[a-z.]+$/i;
 const KNOWN_JOB_HOSTS = /(^|\.)(linkedin\.com|ejobs\.ro|bestjobs\.eu|hipo\.ro)$/i;
 
 /** Stable URL for deduplication: strips tracking params, normalizes LinkedIn job links. */
@@ -14,8 +17,9 @@ export function canonicalUrl(raw: string): string {
   if (/(^|\.)linkedin\.com$/i.test(url.hostname) && linkedInJob?.[1]) {
     return `https://www.linkedin.com/jobs/view/${linkedInJob[1]}/`;
   }
+  const stepstone = STEPSTONE_HOST.test(url.hostname);
   for (const key of [...url.searchParams.keys()]) {
-    if (TRACKING_PARAMS.test(key)) url.searchParams.delete(key);
+    if (TRACKING_PARAMS.test(key) || (stepstone && STEPSTONE_PARAMS.test(key))) url.searchParams.delete(key);
   }
   url.hash = "";
   return url.toString();

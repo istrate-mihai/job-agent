@@ -26,7 +26,7 @@ const ExtractedJobSchema = z.object({
 
 const ExtractionSchema = z.object({ jobs: z.array(ExtractedJobSchema).max(100) });
 
-const SYSTEM_PROMPT = `You extract job postings from job-alert emails and job-board listing pages (LinkedIn, eJobs, BestJobs, Hipo, Juniors and similar).
+const SYSTEM_PROMPT = `You extract job postings from job-alert emails and job-board listing pages (LinkedIn, eJobs, BestJobs, Hipo, Juniors, StepStone and similar).
 Rules:
 - List only real job postings that appear in the email. Skip ads, courses, articles and "jobs you may like" filler without a company.
 - Copy title, company and location exactly as written; use "" for a missing location.
